@@ -26,6 +26,12 @@ interface InstanceOverviewProps<
 > {
   customColumns?: any;
   instances: I[];
+  /**
+   * Total row count of the whole dataset when `instances` is one server-fetched page.
+   * Omit it for client-side pagination over the full `instances` array. Forwarded to
+   * `ReactTable`, which switches to manual pagination when it is set.
+   */
+  totalCount?: number;
   properties: P;
   shape?: NodeShapeWire;
   isLoading?: boolean;
@@ -50,6 +56,7 @@ function InstanceOverview<
 >({
   customColumns,
   instances,
+  totalCount,
   properties,
   shape,
   isLoading = false,
@@ -155,7 +162,10 @@ function InstanceOverview<
       filters: [],
     }
   );
-  //config state can be handled by the parent or here
+  // Config state can be handled by the parent or here. When the parent owns it, `config` is
+  // the live value and `_config` is only the initial snapshot — so the table must read
+  // `config` when present, or a parent-driven page change (server-side pagination) would
+  // never reach it.
   const __setConfig = setConfig || _setConfig;
 
   const handleNodeClick = (nodeValue: any, propertyName: string) => {
@@ -350,8 +360,9 @@ function InstanceOverview<
       clearSelection={clearSelection}
       removeFromSelection={removeFromSelection}
       hasSelection={hasSelection}
-      config={_config}
+      config={config || _config}
       setConfig={__setConfig}
+      totalCount={totalCount}
       shape={shape}
       properties={properties}
       isLoading={isLoading}

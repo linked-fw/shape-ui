@@ -52,6 +52,15 @@ import style from './ReactTable.module.css';
 
 export interface ReactTableProps {
   data: any[] | ShapeSet<any>;
+  /**
+   * Total number of rows in the *whole* dataset, not just `data`.
+   *
+   * Omit it and `data` is the whole dataset: the table paginates it client-side, exactly as
+   * it always has. Supply it and `data` is understood to be one server-fetched page — the
+   * table switches to manual pagination and derives the page count, the page-range label and
+   * the next/last disabled states from this number instead of from `data.length`.
+   */
+  totalCount?: number;
   columns: ColumnDef<any>[];
   toggleSelectAll: () => void;
   isRowSelected: (uri: string) => boolean;
@@ -81,6 +90,7 @@ export interface ReactTableProps {
 
 function ReactTable({
   data,
+  totalCount,
   columns,
   toggleSelectAll,
   isRowSelected,
@@ -191,7 +201,15 @@ function ReactTable({
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    // Client-side pagination only when we hold the whole dataset. With `totalCount` the rows
+    // in `data` are already the page the server cut, so slicing them again would show one
+    // page's worth of one page. `rowCount` left undefined makes react-table fall back to the
+    // pre-pagination row count — i.e. the unchanged client-side behaviour.
+    ...(totalCount === undefined
+      ? { getPaginationRowModel: getPaginationRowModel() }
+      : {}),
+    manualPagination: totalCount !== undefined,
+    rowCount: totalCount,
     onPaginationChange: setPagination,
     state: {
       pagination: config,
@@ -924,6 +942,7 @@ function ReactTable({
         <IconButton
           size="small"
           variant="outline"
+          aria-label="First page"
           className={style.paginationButton}
           onClick={() => table.firstPage()}
           disabled={!table.getCanPreviousPage()}
@@ -933,6 +952,7 @@ function ReactTable({
         <IconButton
           size="small"
           variant="outline"
+          aria-label="Previous page"
           className={style.paginationButton}
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
@@ -942,6 +962,7 @@ function ReactTable({
         <IconButton
           size="small"
           variant="outline"
+          aria-label="Next page"
           className={style.paginationButton}
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
@@ -951,6 +972,7 @@ function ReactTable({
         <IconButton
           size="small"
           variant="outline"
+          aria-label="Last page"
           className={style.paginationButton}
           onClick={() => table.lastPage()}
           disabled={!table.getCanNextPage()}

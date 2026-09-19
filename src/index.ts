@@ -16,26 +16,20 @@
  * nothing about projects, and is worth nothing without shapes to render. The product is the
  * studio that authors them. See arch-03 §UI package layering.
  *
- * **No side-effect imports here, and that is a deliberate exception to the house pattern.**
- * Most `@_linked/*` packages import `./package.js` and `./ontologies/*.js` from their entry
- * point so the package registers itself and its ontology. This one has nothing to register:
- * no `@linkedShape`, no `@linkedUtil`, no `@linkedComponent` anywhere in `src`. Its ontology
- * was empty template scaffolding — one export, no terms, a namespace on a domain we no longer
- * use — and has been deleted.
+ * `./package.js` is imported below, as in every other `@_linked/*` package, so this package
+ * registers itself — the house pattern, nothing special here. It briefly had to be omitted:
+ * it triggered "Class extends value undefined is not a constructor or null" from inside a
+ * query. That was never this package's fault — it was a live-binding bug in core's
+ * `ShapeClass`, which captured `Shape` by named import before `Shape.js` had finished
+ * evaluating, so the runtime subclass extended `undefined`. Fixed in `@_linked/core` 2.18.1
+ * (linked-cm/core#220), which is why this package depends on `^2.18.1`.
  *
- * Importing `./package.js` from here was not merely redundant, it was breaking: this barrel
- * also pulls the whole component graph, and adding core's package machinery on top of that
- * closed an import cycle that left `Shape` undefined when a runtime shape was registered —
- * surfacing as "Class extends value undefined is not a constructor or null", thrown from
- * inside a query, with a stack naming none of it.
- *
- * A package that gains a shape should import `./package.js` from that shape's module, the way
- * `@_linked/auth` does — not from here.
+ * The empty ontology this package scaffolded from the template is gone: one export, no terms,
+ * and a namespace on a domain we no longer use. Nothing referenced it.
  */
 
-// Registers this package with the linked package system. The only side effect here, and it
-// carries no import cycle.
-
+// Registers this package with the linked package system. The only side effect in this barrel.
+import './package.js';
 
 
 export type {
