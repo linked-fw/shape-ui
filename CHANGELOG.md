@@ -1,5 +1,11 @@
 # @\_linked/ui
 
+## 2.3.1
+
+### Patch Changes
+
+- [#16](https://github.com/linked-fw/shape-ui/pull/16) [`c03e001`](https://github.com/linked-fw/shape-ui/commit/c03e00177b953332ecf5f8fcabb9744f1aecd0e7) Thanks [@flyon](https://github.com/flyon)! - Declare npm as the package manager for this repo, convert the build scripts off `yarn`, and mark `package-lock.json` as a generated file.
+
 ## 2.3.0
 
 ### Minor Changes
