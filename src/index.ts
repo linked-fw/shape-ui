@@ -86,8 +86,33 @@ export {default as NodeValuesEditor} from './components/NodeValuesEditor.js';
 export {NodeBadge} from './components/NodeBadge.js';
 export {FilterBadge} from './components/FilterBadge.js';
 
+// Per-datatype value editors. Consumers reach these by direct path
+// (`@_linked/shape-ui/components/SelectEditor`), which only resolves against a
+// built `lib/` if the file is reachable from an entry — so they are exported
+// here as well. Not every one has a consumer in this workspace yet; they are
+// part of the package's surface regardless of who happens to use them today.
+export {CheckboxEditor} from './components/CheckboxEditor.js';
+export {RadioButtonEditor} from './components/RadioButtonEditor.js';
+export {SelectEditor} from './components/SelectEditor.js';
+export {SwitchEditor} from './components/SwitchEditor.js';
+export {TextareaEditor} from './components/TextareaEditor.js';
+export {ToggleEditor} from './components/ToggleEditor.js';
+export {AvatarEditor} from './components/AvatarEditor.js';
+export {DateEditor} from './components/DateEditor.js';
+export {TextfieldEditor} from './components/TextfieldEditor.js';
+// ImageValueEditor is deliberately NOT exported yet. It never compiled — it is
+// written against a core API that has since moved on (`NodeShape.namedNode`,
+// `PropertyShapeWire.uri`, `NodeReferenceValue.label`, `ImageObject.save()`),
+// and it reads instances through `getShapeClass(...).getLocalInstances()`, a
+// live-shape pattern the codebase has moved away from. Exporting it fails the
+// build with 5 type errors. It needs porting, not a compile fix.
+
 // ─── Shape domain ────────────────────────────────────────────────────────────
 export * from './shape/contracts.js';
 export * from './shape/naming.js';
 export * from './shape/nodeDisplay.js';
 export * from './shape/propertyVisibility.js';
+// 1,158 lines of pure shape-domain types plus 13 runtime exports (DATATYPE_MAP,
+// the shape-kind predicates). The consuming app re-exports this whole module
+// for 34 importers, by direct path — so it has to reach lib/.
+export * from './shape/types.js';
