@@ -1,5 +1,19 @@
 # @\_linked/ui
 
+## 2.3.3
+
+### Patch Changes
+
+- [#20](https://github.com/linked-fw/shape-ui/pull/20) [`fc1c0d0`](https://github.com/linked-fw/shape-ui/commit/fc1c0d0ca1bdb7ae311ce6a04ba4a34d9438ca6d) Thanks [@flyon](https://github.com/flyon)! - Compile the whole `src` folder, and let a bare import resolve under Node10.
+
+  The build only emitted what an entry transitively reached, so any module
+  nothing imported was never built — and never type-checked, so it rotted
+  quietly. `include` now covers `src/**/*` with tests excluded explicitly.
+
+  `typesVersions` maps every specifier through `lib/esm/*`, so a `types` value
+  that already carried that prefix had it applied twice and no consumer on
+  classic Node10 resolution could `import` the package by its bare name.
+
 ## 2.3.2
 
 ### Patch Changes
