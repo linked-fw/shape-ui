@@ -1,5 +1,17 @@
 # @\_linked/ui
 
+## 2.3.5
+
+### Patch Changes
+
+- [#24](https://github.com/linked-fw/shape-ui/pull/24) [`6cf4617`](https://github.com/linked-fw/shape-ui/commit/6cf46178a3a0059364a4ae9e5a723cd53090ac63) Thanks [@flyon](https://github.com/flyon)! - Point the changelog generator at this repo's real org.
+
+  `.changeset/config.json` still named `linked-cm/shape-ui` as the GitHub repo,
+  but this package lives in `linked-fw/shape-ui`. Every commit, PR and author
+  link that `@changesets/changelog-github` wrote into `CHANGELOG.md` therefore
+  pointed at a repository that does not exist. Renaming the org makes the
+  generated links resolve.
+
 ## 2.3.4
 
 ### Patch Changes
