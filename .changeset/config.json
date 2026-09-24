@@ -3,7 +3,7 @@
   "changelog": [
     "@changesets/changelog-github",
     {
-      "repo": "linked-cm/shape-ui"
+      "repo": "linked-fw/shape-ui"
     }
   ],
   "commit": false,
