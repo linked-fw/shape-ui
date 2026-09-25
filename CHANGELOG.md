@@ -1,5 +1,20 @@
 # @\_linked/ui
 
+## 2.4.0
+
+### Minor Changes
+
+- [#26](https://github.com/linked-fw/shape-ui/pull/26) [`af82587`](https://github.com/linked-fw/shape-ui/commit/af82587c1c694f7f59d94cb31ba50836b384b05c) Thanks [@flyon](https://github.com/flyon)! - Require `@_linked/core@^2.22.8` (was `^2.18.1`), and pin it in the lockfile.
+
+  The declared range was wide enough that the resolved core depended on whatever the
+  consumer — or this repo's own CI, via `package-lock.json` — happened to install. Core
+  decides how a shape's IRI is minted, so a stale core made this package emit legacy
+  `data.lincd.org` IRIs instead of the arch-02 `linked.cm` scheme. Which IRIs a published
+  package produces should not be a function of the installer's dependency tree.
+
+  Minor rather than patch: this raises the minimum core a consumer must resolve, so it
+  changes what gets installed rather than only what this package does internally.
+
 ## 2.3.5
 
 ### Patch Changes
