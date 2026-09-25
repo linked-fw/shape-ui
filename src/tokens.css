@@ -7,7 +7,7 @@
  * `--z-tooltip` is `--layer-tooltip`, `--typography-xs-size` is `--text-xs`. Those were
  * renamed in the components rather than shipped here. The families that were genuinely
  * missing went into the theme instead of here: `--intent-*` and `--table-*`
- * (linked-cm/css#11), and the named `--space-*` scale (linked-cm/css#12) that a CSS module
+ * (linked-fw/css#11), and the named `--space-*` scale (linked-fw/css#12) that a CSS module
  * needs because Tailwind's `--spacing()` is a compile-time function and cannot resolve in a
  * stylesheet compiled on its own.
  *
