@@ -42,7 +42,7 @@
     "@_linked/icons": "^1.0.0",
     "@_linked/primitives": "^1.2.0",
     "@capacitor/core": "^5.3.0",
-    "@changesets/changelog-github": "^0.5.2",
+    "@changesets/changelog-github": "^0.7.0",
     "@changesets/cli": "^2.29.8",
     "@types/node": "^20.14.9",
     "@types/react": "^19.3.0",
