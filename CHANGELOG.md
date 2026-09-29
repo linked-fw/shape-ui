@@ -1,5 +1,11 @@
 # @\_linked/ui
 
+## 2.5.1
+
+### Patch Changes
+
+- [#31](https://github.com/linked-fw/shape-ui/pull/31) [`09569fd`](https://github.com/linked-fw/shape-ui/commit/09569fd5a6e84072683a7141b7ae6e66e5ddee64) Thanks [@flyon](https://github.com/flyon)! - Sourcemaps now embed their TypeScript source, so consumers no longer see 'points to missing source files' warnings.
+
 ## 2.5.0
 
 ### Minor Changes
