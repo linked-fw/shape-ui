@@ -1,7 +1,8 @@
 **/node_modules
 
-# `src` is SHIPPED: the exports map resolves the `development` condition and tokens.css
-# from it. Tests are not.
+# `src` is SHIPPED, but nothing in the exports map points into it: every export resolves to
+# lib/. It is shipped so a Linked app's dev server (`linked start`) can find the package as a
+# source workspace and serve it from src with HMR. Tests are not shipped.
 **/*.test.ts
 **/*.test.tsx
 .idea
