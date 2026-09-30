@@ -58,24 +58,26 @@
   "module": "lib/esm/index.js",
   "exports": {
     ".": {
-      "development": "./src/index.ts",
       "types": "./lib/esm/index.d.ts",
       "import": "./lib/esm/index.js",
       "default": "./lib/esm/index.js"
     },
     "./components/*": {
-      "development": "./src/components/*.tsx",
       "types": "./lib/esm/components/*.d.ts",
       "import": "./lib/esm/components/*.js",
       "default": "./lib/esm/components/*.js"
     },
-    "./*": {
-      "development": "./src/*.ts",
+    "./*.js": {
       "types": "./lib/esm/*.d.ts",
       "import": "./lib/esm/*.js",
       "default": "./lib/esm/*.js"
     },
-    "./tokens.css": "./src/tokens.css"
+    "./*": {
+      "types": "./lib/esm/*.d.ts",
+      "import": "./lib/esm/*.js",
+      "default": "./lib/esm/*.js"
+    },
+    "./tokens.css": "./lib/esm/tokens.css"
   },
   "typesVersions": {
     "*": {
