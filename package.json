@@ -47,7 +47,7 @@
     "@types/node": "^24.0.0",
     "@types/react": "^19.3.0",
     "copyfiles": "^2.4.1",
-    "framer-motion": "^12.0.0",
+    "motion": "^12.0.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "rimraf": "^5.0.7",
@@ -93,7 +93,7 @@
     "@_linked/css": "^0.3.0",
     "@_linked/icons": "^1.0.0",
     "@_linked/primitives": "^1.2.0",
-    "framer-motion": ">=11",
+    "motion": ">=11",
     "react": "^18 || ^19"
   },
   "files": [
