@@ -1,5 +1,11 @@
 # @\_linked/ui
 
+## 2.5.2
+
+### Patch Changes
+
+- [#44](https://github.com/linked-fw/shape-ui/pull/44) [`5e95897`](https://github.com/linked-fw/shape-ui/commit/5e95897596dc01e5e20af74b9b0e64387498c3a4) Thanks [@flyon](https://github.com/flyon)! - Every export now resolves to the compiled `lib/esm` output, in every environment. The exports map listed a `development` condition ahead of `import`, pointing at the shipped TypeScript source; Vite enables `development` by default, so a Vite app loaded this package from raw `src/*.ts(x)` in dev — compiled with the app's settings rather than this package's — and from `lib` in its build. `./tokens.css` now points at `lib/esm/tokens.css`, and `.js`-suffixed subpaths resolve via a `./*.js` entry. `src` is still published so a Linked app's dev server can serve the package from source.
+
 ## 2.5.1
 
 ### Patch Changes
