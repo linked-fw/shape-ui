@@ -5,7 +5,7 @@ import type { PropertyShapeWire } from '@_linked/core/shapes/nodeShapeWire';
  *
  * `optional` is still displayed — it fills the "add another field" picker and is rendered
  * in `full` and in `form-edit` whenever the instance has a value. So mapping
- * `linked_core:displayHidden` onto `optional` did nothing at all. Hidden needs its own
+ * `core:displayHidden` onto `optional` did nothing at all. Hidden needs its own
  * value that every mode filters, including the "nothing qualified, show everything"
  * fallback.
  */
