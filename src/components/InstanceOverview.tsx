@@ -1,4 +1,3 @@
-import { ColumnDef } from '@tanstack/react-table';
 import type { ShapeInstancesQueryConfig } from '../shape/contracts.js';
 import type { PropertyShapeWire, NodeShapeWire } from '@_linked/core/shapes/nodeShapeWire';
 import { useDataManagerHost } from '../hostContext.js';
@@ -8,7 +7,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import ImageThumb from '@_linked/primitives/components/ImageThumb';
 import {NodeBadge} from './NodeBadge.js';
 import style from './InstanceOverview.module.css';
-import ReactTable, { type ReactTableProps } from './ReactTable.js';
+import ReactTable, { type ReactTableProps, type ShapeTableColumnDef } from './ReactTable.js';
 
 type PropertiesMap = Record<string, PropertyShapeWire>;
 type InstanceRecord<P extends PropertiesMap> = Partial<
@@ -189,7 +188,7 @@ function InstanceOverview<
   }, [selectedUris]);
 
 
-  let initialColumns: ColumnDef<I>[] = [
+  let initialColumns: ShapeTableColumnDef<I>[] = [
     {
       id: 'selection',
       cell: ({ row }) => (
@@ -347,7 +346,7 @@ function InstanceOverview<
     });
   }
 
-  const columns = React.useMemo<ColumnDef<I>[]>(() => initialColumns, [properties]);
+  const columns = React.useMemo<ShapeTableColumnDef<I>[]>(() => initialColumns, [properties]);
 
   return (
     <ReactTable
