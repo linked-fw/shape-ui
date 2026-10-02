@@ -21,7 +21,8 @@
     "start": "npm exec linked dev",
     "build": "rimraf ./lib && npm run build-esm && npm run copy-to-lib",
     "build-esm": "echo \"compiling ESM\" && rimraf ./lib/esm && tsc -p tsconfig-esm.json",
-    "copy-to-lib": "echo 'copying CSS + JSON assets to lib folder' && copyfiles -u 1 'src/**/*.css' 'src/**/*.json' lib/esm"
+    "copy-to-lib": "echo 'copying CSS + JSON assets to lib folder' && copyfiles -u 1 'src/**/*.css' 'src/**/*.json' lib/esm",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.cjs"
   },
   "keywords": [
     "lincd",
@@ -34,7 +35,7 @@
     "@_linked/core": "^2.22.8",
     "@_linked/react": "^1.5.3",
     "@_linked/schema": "^1.0",
-    "@tanstack/react-table": "^8.20.5"
+    "@tanstack/react-table": "^9.0.0"
   },
   "devDependencies": {
     "@_linked/cli": "^1.2",
@@ -44,13 +45,21 @@
     "@capacitor/core": "^5.3.0",
     "@changesets/changelog-github": "^1.0.0",
     "@changesets/cli": "^3.0.0",
+    "@jest/globals": "^29.7.0",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/react": "^16.3.3",
+    "@types/jest": "^29.5.14",
     "@types/node": "^24.0.0",
     "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "copyfiles": "^2.4.1",
     "framer-motion": "^12.0.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "rimraf": "^5.0.7",
+    "ts-jest": "^29.4.14",
     "tsconfig-to-dual-package": "^1.2.0",
     "typescript": "^5.7.3",
     "typescript-plugin-css-modules": "^5.1.0"

@@ -1,11 +1,16 @@
 import {
-  ColumnDef,
+  type ColumnDef,
+  columnVisibilityFeature,
+  createPaginatedRowModel,
+  createSortedRowModel,
   flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
+  rowPaginationFeature,
+  rowSortingFeature,
+  sortFn_alphanumeric,
+  sortFn_datetime,
+  sortFn_text,
+  tableFeatures,
+  useTable,
 } from '@tanstack/react-table';
 import type { ShapeInstancesQueryConfig } from '../shape/contracts.js';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -50,6 +55,36 @@ import BatchEditDrawer from './BatchEditDrawer.js';
 import { InstanceDeletionDialog, type InstanceDeletionDialogProps } from './InstanceDeletionDialog.js';
 import style from './ReactTable.module.css';
 
+/**
+ * What the table registers with react-table: header-click sorting, pagination (client-side, or
+ * manual when the server cut the page), and visible cells per row.
+ *
+ * The sort functions are the ones `'auto'` picks between for a column — `alphanumeric` and
+ * `text` for strings, `datetime` for dates. They must be registered: an unregistered auto pick
+ * falls back to `basic`, a plain `<` comparison that is case-sensitive and orders "item10"
+ * before "item2".
+ *
+ * Row selection is NOT react-table's: the parent owns it as a set of instance IRIs, so it
+ * survives paging and refetches, which react-table's row-index selection would not.
+ */
+export const shapeTableFeatures = tableFeatures({
+  rowSortingFeature,
+  rowPaginationFeature,
+  columnVisibilityFeature,
+  sortedRowModel: createSortedRowModel(),
+  paginatedRowModel: createPaginatedRowModel(),
+  sortFns: {
+    alphanumeric: sortFn_alphanumeric,
+    text: sortFn_text,
+    datetime: sortFn_datetime,
+  },
+});
+
+export type ShapeTableFeatures = typeof shapeTableFeatures;
+
+/** A column of the shape table. */
+export type ShapeTableColumnDef<TData = any> = ColumnDef<ShapeTableFeatures, TData, any>;
+
 export interface ReactTableProps {
   data: any[] | ShapeSet<any>;
   /**
@@ -61,7 +96,7 @@ export interface ReactTableProps {
    * the next/last disabled states from this number instead of from `data.length`.
    */
   totalCount?: number;
-  columns: ColumnDef<any>[];
+  columns: ShapeTableColumnDef<any>[];
   toggleSelectAll: () => void;
   isRowSelected: (uri: string) => boolean;
   selectedUris: Set<string>;
@@ -195,19 +230,14 @@ function ReactTable({
     setConfig(newVal);
   };
 
-  const table = useReactTable({
+  const table = useTable({
+    features: shapeTableFeatures,
     columns,
     data: filteredData,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    // Client-side pagination only when we hold the whole dataset. With `totalCount` the rows
-    // in `data` are already the page the server cut, so slicing them again would show one
-    // page's worth of one page. `rowCount` left undefined makes react-table fall back to the
-    // pre-pagination row count — i.e. the unchanged client-side behaviour.
-    ...(totalCount === undefined
-      ? { getPaginationRowModel: getPaginationRowModel() }
-      : {}),
+    // With `totalCount` the rows in `data` are already the page the server cut, so slicing them
+    // again would show one page's worth of one page: manual pagination skips the paginated row
+    // model. `rowCount` left undefined makes react-table fall back to the pre-pagination row
+    // count — i.e. client-side pagination over the whole dataset.
     manualPagination: totalCount !== undefined,
     rowCount: totalCount,
     onPaginationChange: setPagination,
@@ -904,7 +934,7 @@ function ReactTable({
         <Typography className={style.pageInfo}>
           Page{' '}
           <strong>
-            {table.getState().pagination.pageIndex + 1} of{' '}
+            {table.state.pagination.pageIndex + 1} of{' '}
             {table.getPageCount().toLocaleString()}
           </strong>
         </Typography>
@@ -913,7 +943,7 @@ function ReactTable({
             size="small"
             type="number"
             className={style.goToPageForm}
-            value={table.getState().pagination.pageIndex + 1}
+            value={table.state.pagination.pageIndex + 1}
             onChange={(e) => {
               const page = e.target.value ? Number(e.target.value) - 1 : 0;
               table.setPageIndex(page);
@@ -922,7 +952,7 @@ function ReactTable({
         </div>
         <div className={style.pageShowItem}>
           <Select.Root
-            value={table.getState().pagination.pageSize.toString()}
+            value={table.state.pagination.pageSize.toString()}
             onValueChange={(value) => table.setPageSize(Number(value))}
           >
             <Select.Trigger size="small">
