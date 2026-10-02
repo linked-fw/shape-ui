@@ -8,7 +8,7 @@
  * printed view) makes the same decisions.
  *
  * The rule throughout: **what the shape declares beats what the renderer guesses.**
- * `linked_core:displayRank` orders, `linked_core:displayHidden` removes, `sh:order`
+ * `core:displayRank` orders, `core:displayHidden` removes, `sh:order`
  * breaks ties. The heuristics apply only where a shape declares nothing — which, until
  * the display vocabulary existed, was everywhere.
  */
