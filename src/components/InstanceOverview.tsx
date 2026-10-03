@@ -33,7 +33,8 @@ interface InstanceOverviewProps<
    * `ReactTable`, which switches to manual pagination when it is set.
    */
   totalCount?: number;
-  properties: P;
+  /** `null` while the shape's properties are still loading; the table then has no columns. */
+  properties: P | null;
   shape?: NodeShapeWire;
   isLoading?: boolean;
   config?: ShapeInstancesQueryConfig;
@@ -172,7 +173,7 @@ function InstanceOverview<
 
   const handleNodeClick = (nodeValue: any, propertyName: string) => {
     // Open the node through the shape its relation resolves to; with none there is no view.
-    const shapeId = resolveRelation(properties[propertyName]).shapeId;
+    const shapeId = resolveRelation(properties?.[propertyName]).shapeId;
     if (shapeId && nodeValue.id) {
       host.navigate?.toInstance(shapeId, nodeValue.id);
     }

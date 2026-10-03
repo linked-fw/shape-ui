@@ -32,7 +32,8 @@ import style from './InstanceView.module.css';
 export interface InstanceViewProps {
   shape?: NodeShapeWire;
   /** Property metadata by label — used to resolve which shape a related node belongs to. */
-  properties: Record<string, PropertyShapeWire>;
+  /** @deprecated Not read by this component; it will be removed. */
+  properties?: Record<string, PropertyShapeWire> | null;
   /** The instance's values, keyed by property label. */
   subject: Record<string, any> | null;
   /**
