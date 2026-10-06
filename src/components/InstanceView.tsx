@@ -31,14 +31,16 @@ import style from './InstanceView.module.css';
 
 export interface InstanceViewProps {
   shape?: NodeShapeWire;
-  /** Property metadata by label — used to resolve which shape a related node belongs to. */
-  /** @deprecated Not read by this component; it will be removed. */
+  /**
+   * Property metadata by label; decides which related nodes link to their own view. `null` or
+   * absent while the shape loads, and then no related node links.
+   */
   properties?: Record<string, PropertyShapeWire> | null;
   /** The instance's values, keyed by property label. */
   subject: Record<string, any> | null;
   /**
    * A related node was clicked. Given the node and the property it came from, so the caller
-   * can resolve the target shape with `useRelationShapeResolver()(properties[propertyName])`.
+   * can resolve the target shape with `useRelationShapeResolver()` from its own property metadata.
    */
   onNodeClick?: (node: {id: string; label?: string}, propertyName: string) => void;
 }
@@ -56,7 +58,7 @@ export function InstanceView({
   const reducedMotion = useReducedMotion();
   const resolveRelation = useRelationShapeResolver();
   // A related node links only when its relation resolves to a shape it can be opened through.
-  const linkable = (propertyName: string) => !!resolveRelation(properties[propertyName]).shapeId;
+  const linkable = (propertyName: string) => !!resolveRelation(properties?.[propertyName]).shapeId;
 
   const expand = (propertyName: string) =>
     setExpandedArrays((prev) => new Set(prev).add(propertyName));
