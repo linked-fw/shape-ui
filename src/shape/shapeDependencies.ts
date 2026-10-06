@@ -27,6 +27,12 @@ const IRI_NODE_KINDS = new Set([
   shacl.BlankNodeOrIRI.id,
 ]);
 
+/**
+ * Only relations with a declared `sh:node` take part. The cascade matches one shape's
+ * property against another shape's by shape IRI, which only means something between shapes
+ * that were declared; a `sh:class`-only relation resolves to a shape at read time, and
+ * chaining guesses on both ends would narrow a field by a link nobody authored.
+ */
 function isIriProperty(p: NodeShapeWire['propertyShapes'][number]): boolean {
   return !!p.nodeKind && IRI_NODE_KINDS.has(p.nodeKind.id) && !!p.valueShape?.id;
 }

@@ -12,13 +12,25 @@
  * provider should show an empty picker, not break the page that embedded it.
  */
 
-import {createContext, createElement, useContext, useMemo, type ReactNode} from 'react';
+import {
+  createContext,
+  createElement,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
+import type {NodeShapeWire} from '@_linked/core/shapes/nodeShapeWire';
 import {nullHost, type DataManagerHost} from './host.js';
 import {registerRuntimeShapes} from '@_linked/core/shapes/registerRuntimeShape';
 import {narrowSuggestions, searchInstancesWithDsl} from './search.js';
 import {createInstanceWithDsl, updateInstanceWithDsl} from './write.js';
 
 const HostContext = createContext<DataManagerHost>(nullHost());
+
+/** The host's catalog as a list, once loaded; `undefined` while loading or when it has none. */
+const CatalogContext = createContext<readonly NodeShapeWire[] | undefined>(undefined);
 
 export interface DataManagerHostProviderProps {
   host: DataManagerHost;
@@ -29,7 +41,55 @@ export function DataManagerHostProvider({
   host,
   children,
 }: DataManagerHostProviderProps) {
-  return createElement(HostContext.Provider, {value: host}, children);
+  const catalog = useLoadedCatalog(host);
+  return createElement(
+    HostContext.Provider,
+    {value: host},
+    createElement(CatalogContext.Provider, {value: catalog}, children),
+  );
+}
+
+/**
+ * Load the host's catalog once per host, for lookups that have to answer synchronously.
+ *
+ * Which shape a relation's values go through is decided while rendering — whether to offer
+ * a picker, a link, a create button — so it cannot wait on `resolveCatalog()` at each field.
+ * The catalog is loaded here, once, and every field reads the same list. The answer is
+ * tagged with the host it came from so a host change never serves the previous project's
+ * catalog while the next one loads.
+ */
+function useLoadedCatalog(host: DataManagerHost): readonly NodeShapeWire[] | undefined {
+  const [loaded, setLoaded] = useState<{
+    host: DataManagerHost;
+    shapes: readonly NodeShapeWire[];
+  }>();
+
+  useEffect(() => {
+    if (!host.resolveCatalog) return;
+    let current = true;
+    host.resolveCatalog().then(
+      (catalog) => {
+        if (current && catalog) setLoaded({host, shapes: Object.values(catalog)});
+      },
+      // A catalog that fails to load leaves lookups on the registry, as for a host with none.
+      () => undefined,
+    );
+    return () => {
+      current = false;
+    };
+  }, [host]);
+
+  return loaded?.host === host ? loaded.shapes : undefined;
+}
+
+/**
+ * The host's catalog, when it has one and it has loaded.
+ *
+ * `undefined` means "no catalog to resolve against" — lookups then fall back to core's
+ * shape registry. Not the same as an empty list, which is a catalog with nothing in it.
+ */
+export function useHostCatalog(): readonly NodeShapeWire[] | undefined {
+  return useContext(CatalogContext);
 }
 
 /**

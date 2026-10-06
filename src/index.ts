@@ -43,7 +43,8 @@ export type {
 export {nullHost} from './host.js';
 
 export type {DataManagerHostProviderProps} from './hostContext.js';
-export {DataManagerHostProvider, useDataManagerHost} from './hostContext.js';
+export {DataManagerHostProvider, useDataManagerHost, useHostCatalog} from './hostContext.js';
+export {useRelationShape, useRelationShapeResolver} from './shape/relationShape.js';
 
 export type {InstanceQuery, InstanceRows} from './read.js';
 export {selectInstance, selectInstances} from './read.js';

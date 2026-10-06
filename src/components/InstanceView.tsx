@@ -36,7 +36,7 @@ export interface InstanceViewProps {
   subject: Record<string, any> | null;
   /**
    * A related node was clicked. Given the node and the property it came from, so the caller
-   * can resolve the target shape from `properties[propertyName].valueShape`.
+   * can resolve the target shape with `useRelationShapeResolver()(properties[propertyName])`.
    */
   onNodeClick?: (node: {id: string; label?: string}, propertyName: string) => void;
 }
