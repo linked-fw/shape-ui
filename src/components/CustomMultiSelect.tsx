@@ -7,11 +7,13 @@ import { Shape } from '@_linked/core/shapes/Shape';
 import { cl } from '@_linked/react/utils/ClassNames';
 import { getNodeDisplay } from '../shape/nodeDisplay.js';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useDataManagerHost } from '../hostContext.js';
+import { useDataManagerHost, useHostCatalog, useHostCatalogLoading } from '../hostContext.js';
+import { useRelationShape } from '../shape/relationShape.js';
 import { formatShapeLabel } from '../shape/naming.js';
 import { Icons } from '@_linked/icons';
 import { InlineImageThumb } from '@_linked/primitives/components/ImageThumb';
 import { Spinner } from '@_linked/primitives/components/Spinner';
+import { NodeBadge } from './NodeBadge.js';
 import style from './CustomMultiSelect.module.css';
 
 interface CustomMultiSelectProps {
@@ -22,8 +24,8 @@ interface CustomMultiSelectProps {
    * picked from. Needed for the pick-mode round-trip, which has to know where to return to.
    *
    * Supply these instead of letting the component read the route: it used to derive both
-   * from `useParams().shape_uri` plus CN's settings context, which assumed CN's URL layout
-   * for a value every caller already holds.
+   * from `useParams().shape_uri` plus one host app's settings context, which assumed that
+   * app's URL layout for a value every caller already holds.
    */
   sourceShape?: NodeShapeWire;
   sourceShapeUri?: string;
@@ -51,7 +53,6 @@ const CustomMultiSelect = ({
   const [isComboboxExpanded, setIsComboboxExpanded] = useState(false);
   const [isComboboxOpen, setIsComboboxOpen] = useState(false);
   const [comboboxInputValue, setComboboxInputValue] = useState('');
-  const [createNewInstanceFor, setCreateNewInstanceFor] = useState(null);
   const [maxVisibleOptions, setMaxVisibleOptions] = useState(5);
   const [searchResults, setSearchResults] = useState<{ id: string; label: string; image?: string }[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -67,7 +68,7 @@ const CustomMultiSelect = ({
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // The shape being edited arrives as a prop. It used to be read from the route
   // (`useParams().shape_uri` + `getShapeFromParams(..., projectConfig)`), which assumed
-  // CN's URL layout AND CN's settings context — two couplings for one value every caller
+  // one host app's URL layout AND its settings context — two couplings for one value every caller
   // already has in hand.
   const shape_uri = sourceShapeUri ?? sourceShape?.id;
   // The host supplies searching, inline creation and navigation. The picker used to reach
@@ -75,7 +76,17 @@ const CustomMultiSelect = ({
   // `AddInstanceForms` — a molecule importing an organism, which is both a cycle and the
   // one thing that made this component unextractable.
   const host = useDataManagerHost();
-  const nodeShape = sourceShape as NodeShapeWire;
+  // The shape the VALUES go through — searched, picked from, created. Not `sourceShape`,
+  // which owns the property. Resolved, because a relation declared with `sh:class` alone
+  // names a class and no shape.
+  const relationShapeId = useRelationShape(property).shapeId;
+  const catalog = useHostCatalog();
+  // A class-only relation has no shape until the host's catalog arrives; say so rather than
+  // showing the same "-" as a relation that will never have one.
+  const catalogLoading = useHostCatalogLoading();
+  const relationShapeLabel = relationShapeId
+    ? catalog?.find((s) => s.id === relationShapeId)?.label
+    : undefined;
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const valueArray = (Array.isArray(values) ? values : [values]).filter(Boolean);
 
@@ -120,8 +131,8 @@ const CustomMultiSelect = ({
   //
   // This field sent the viewer away to choose and was unmounted while they did, so the
   // answer cannot arrive through a callback — it has to be collected on the way back in.
-  // Where it was kept is the host's business; this used to read CN's sessionStorage
-  // directly, which is why the component only worked inside Create Now.
+  // Where it was kept is the host's business; this used to read one host app's
+  // sessionStorage directly, which is why the component only worked inside that app.
   useEffect(() => {
     if (!property?.label) return;
     const pickedItems = host.picking?.takeResult({
@@ -153,8 +164,7 @@ const CustomMultiSelect = ({
   // Debounced backend search — resets offset on new search text
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    const valueShapeId = property?.valueShape?.id;
-    if (!comboboxInputValue || !host.searchInstances || !valueShapeId) {
+    if (!comboboxInputValue || !host.searchInstances || !relationShapeId) {
       setSearchResults([]);
       setSearchOffset(0);
       setHasMore(false);
@@ -165,7 +175,7 @@ const CustomMultiSelect = ({
     setSearchOffset(0);
     debounceRef.current = setTimeout(async () => {
       try {
-        const response = await host.searchInstances(valueShapeId, {
+        const response = await host.searchInstances(relationShapeId, {
           query: comboboxInputValue,
           limit: 20,
           offset: 0,
@@ -183,7 +193,7 @@ const CustomMultiSelect = ({
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [comboboxInputValue, host, property?.valueShape?.id, narrowedIds]);
+  }, [comboboxInputValue, host, relationShapeId, narrowedIds]);
 
   // Load initial options when popover opens or narrowing changes (browse mode)
   useEffect(() => {
@@ -192,12 +202,11 @@ const CustomMultiSelect = ({
     if (triggerRef.current) {
       setTriggerWidth(triggerRef.current.getBoundingClientRect().width);
     }
-    const valueShapeId = property?.valueShape?.id;
-    if (!host.searchInstances || !valueShapeId) return;
+    if (!host.searchInstances || !relationShapeId) return;
     setIsLoadingInitial(true);
     setBrowseOffset(0);
     host
-      .searchInstances(valueShapeId, {
+      .searchInstances(relationShapeId, {
         query: '',
         limit: 20,
         offset: 0,
@@ -212,12 +221,11 @@ const CustomMultiSelect = ({
         setHasMore(false);
       })
       .finally(() => setIsLoadingInitial(false));
-  }, [isComboboxOpen, narrowedIds]);
+  }, [isComboboxOpen, narrowedIds, relationShapeId]);
 
   // Load more results (infinite scroll) for both browse and search modes
   const loadMore = useCallback(async () => {
-    const valueShapeId = property?.valueShape?.id;
-    if (!host.searchInstances || !valueShapeId || isLoadingMore || !hasMore) return;
+    if (!host.searchInstances || !relationShapeId || isLoadingMore || !hasMore) return;
 
     setIsLoadingMore(true);
     const isSearchMode = !!comboboxInputValue;
@@ -225,7 +233,7 @@ const CustomMultiSelect = ({
     const nextOffset = currentOffset + 20;
 
     try {
-      const response = await host.searchInstances(valueShapeId, {
+      const response = await host.searchInstances(relationShapeId, {
         query: isSearchMode ? comboboxInputValue : '',
         limit: 20,
         offset: nextOffset,
@@ -246,7 +254,7 @@ const CustomMultiSelect = ({
     } finally {
       setIsLoadingMore(false);
     }
-  }, [host, property?.valueShape?.id, comboboxInputValue, isLoadingMore, hasMore, searchOffset, browseOffset]);
+  }, [host, relationShapeId, comboboxInputValue, isLoadingMore, hasMore, searchOffset, browseOffset]);
 
   // IntersectionObserver for infinite scroll sentinel
   useEffect(() => {
@@ -307,15 +315,15 @@ const CustomMultiSelect = ({
   const onClickTable = async () => {
     if (onShowAsTable) {
       onShowAsTable();
-    } else if (property?.valueShape?.id) {
+    } else if (relationShapeId) {
       // Flush draft to server before navigating away — returns the draftId
       const flushedDraftId = await onBeforeNavigate?.();
-      // How "browse all of these" is presented is the host's decision — Create Now
+      // How "browse all of these" is presented is the host's decision — one host
       // navigates to the overview in pick mode; another host might open a sheet. The
       // flushed draft id rides along as the resume token so the half-filled form survives
       // whatever round trip the host chooses.
       host.picking?.open({
-        shapeIri: property.valueShape.id,
+        shapeIri: relationShapeId,
         propertyLabel: property.label,
         sourceShapeIri: shape_uri,
         maxCount: property.maxCount,
@@ -333,10 +341,22 @@ const CustomMultiSelect = ({
       : valueArray.map((el) => ({ id: el.id, label: renderText(el), image: getImageFromValue(el) }));
 
   const openCreateNew = () => {
-    setCreateNewInstanceFor(nodeShape);
     setIsComboboxOpen(false); // close popover first — avoids z-index overlap
     setIsDialogOpen(true);
   };
+
+  // No shape to search, pick or create through: show what is there as plain references.
+  if (!relationShapeId) {
+    return (
+      <div className={style.Root} aria-busy={catalogLoading || undefined}>
+        {comboboxValues.length > 0 ? (
+          comboboxValues.map((val) => <NodeBadge key={val.id} text={val.label || val.id} />)
+        ) : (
+          <p className={style.selectorButton}>{catalogLoading ? '…' : '-'}</p>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className={style.Root}>
@@ -492,10 +512,10 @@ const CustomMultiSelect = ({
         <Dialog.Content className={style.dialogRoot}>
           <Dialog.Header className={style.dialogHeader}>
             <Dialog.Title>
-              Create New {nodeShape?.label ? formatShapeLabel(nodeShape.label) : ''}
+              Create New {relationShapeLabel ? formatShapeLabel(relationShapeLabel) : ''}
             </Dialog.Title>
             <Dialog.Description>
-              Fill the form to create a new {nodeShape?.label ? formatShapeLabel(nodeShape.label) : ''}
+              Fill the form to create a new {relationShapeLabel ? formatShapeLabel(relationShapeLabel) : ''}
             </Dialog.Description>
           </Dialog.Header>
           <div className={style.dialogContent}>
@@ -505,8 +525,12 @@ const CustomMultiSelect = ({
               a molecule reaching up into an organism and into the control plane. Now it
               only decides WHEN to ask.
             */}
+            {/*
+              The related shape, not the shape being edited: the created instance becomes a
+              VALUE of this field, so it has to be one of the things the field points at.
+            */}
             {host.inlineCreate?.({
-              shapeIri: (createNewInstanceFor || nodeShape)?.id,
+              shapeIri: relationShapeId,
               onCreated: (created) => {
                 setIsDialogOpen(false);
                 if (created?.id) onUpdateCombobox(created);

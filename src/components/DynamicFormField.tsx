@@ -1,6 +1,7 @@
 import { Tooltip } from '@_linked/primitives/components/Tooltip';
 import type { PropertyShapeWire } from '@_linked/core/shapes/nodeShapeWire';
 import { shacl } from '@_linked/core/ontologies/shacl';
+import { isRelation } from '@_linked/core/shapes/relationShape';
 import { xsd } from '@_linked/core/ontologies/xsd';
 import { Shape } from '@_linked/core/shapes/Shape';
 import { useState } from 'react';
@@ -128,15 +129,16 @@ function DynamicForm({
 
   const datatype = property.datatype;
   const nodeKind = property.nodeKind;
-  const valueShape = property.valueShape;
 
   const handleBlur = (val: any) => {
     const err = validateField(property, val);
     setLocalError(err);
   };
 
-  // Guard: skip properties without nodeKind (incomplete shape data)
-  if (!nodeKind) return null;
+  // Guard: skip properties that say neither what kind of value they hold nor what they
+  // point at (incomplete shape data). A `sh:class` or `sh:node` alone is enough: the
+  // value is a node.
+  if (!nodeKind && !isRelation(property)) return null;
 
   // ── sh:in enumeration → render as <select> dropdown (both literal and IRI) ──
   //
@@ -145,6 +147,11 @@ function DynamicForm({
   // time. Same answer, computed in one place.
   const choices = enumOptions(property);
   if (choices.length > 0) {
+    // A relation's member is a node, so it is written as a reference. A bare string on a
+    // `sh:class`/`sh:node`/IRI property is a literal, and validation rejects it on save.
+    const relation = isRelation(property);
+    const toFieldValue = (selected: string) =>
+      selected ? (relation ? { id: selected } : selected) : undefined;
     const currentValue =
       value !== undefined && value !== null
         ? typeof value === 'object' && value.id
@@ -158,9 +165,9 @@ function DynamicForm({
           required={required}
           defaultValue={currentValue}
           onChange={(e) => {
-            of[property.label] = e.target.value || undefined;
+            of[property.label] = toFieldValue(e.target.value);
           }}
-          onBlur={(e) => handleBlur(e.target.value)}
+          onBlur={(e) => handleBlur(toFieldValue(e.target.value))}
         >
           <option value="">— Select —</option>
           {choices.map((opt) => (
@@ -174,11 +181,7 @@ function DynamicForm({
   }
 
   // Object / IRI properties — rendered by NodeValuesEditor (CustomMultiSelect)
-  if (
-    nodeKind.id === shacl.IRI.id ||
-    nodeKind.id === shacl.BlankNode.id ||
-    nodeKind.id === shacl.BlankNodeOrIRI.id
-  ) {
+  if (isRelation(property)) {
     // Dependency hint: show subtle text when parent field can narrow this field
     const narrowingHint =
       dependencyState && !dependencyState.parentHasValue
@@ -207,7 +210,7 @@ function DynamicForm({
   }
 
   // Literal properties
-  if (nodeKind.id === shacl.Literal.id) {
+  if (nodeKind?.id === shacl.Literal.id) {
     const dt = datatype?.id;
 
     // Boolean → native checkbox

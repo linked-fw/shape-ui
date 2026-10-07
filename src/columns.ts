@@ -17,6 +17,7 @@ import type {
   NodeShapeWire,
   PropertyShapeWire,
 } from '@_linked/core/shapes/nodeShapeWire';
+import {isRelation} from '@_linked/core/shapes/relationShape';
 
 /**
  * Whether the table shows the columns it judges useful, or every column.
@@ -94,7 +95,7 @@ function fitsContext(
   property: PropertyShapeWire,
   context: DisplayContext,
 ): boolean {
-  const isRelation = !!(property.valueShape || property.class);
+  const relation = isRelation(property);
   const isMultiValued = property.maxCount != null && property.maxCount !== 1;
   const isLongText = !!property.datatype && LONG_TEXT.has(property.datatype.id);
 
@@ -102,7 +103,7 @@ function fitsContext(
     case 'cell':
       // One value, rendered inline. A relation would need a badge and a long text would
       // need truncation; neither belongs in a cell that stands in for the whole instance.
-      return !isRelation && !isMultiValued && !isLongText;
+      return !relation && !isMultiValued && !isLongText;
     case 'card':
       // Room for a few values including a related node, but still not a wall of text.
       return !isLongText;

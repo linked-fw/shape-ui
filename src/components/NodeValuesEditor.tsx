@@ -7,7 +7,7 @@ import style from './NodeValuesEditor.module.css';
 //TODO: it also checks if the property has `inList` and then uses inList.getContents() as potential values
 //TODO: it also updates the value by using of[property.label]
 // it renders the MultiSelect component and provides value & multiselect props
-// it also provides potentialValues to MultiSelect, which will be the instances of property.valueShape.getLocalInstances()
+// it also provides potentialValues to MultiSelect, which will be the instances of the relation's shape
 // it renders <MultiSelect />
 interface NodeValuesEditorProps {
   property: PropertyShapeWire;
@@ -22,17 +22,6 @@ interface NodeValuesEditorProps {
   isNarrowing?: boolean;
 }
 const NodeValuesEditor = ({ property, of, sourceShape, onBeforeNavigate, narrowedIds, isNarrowing }: NodeValuesEditorProps) => {
-  let valueShape = property.valueShape;
-  // let shapeClass = getShapeClass(of.targetClass);
-
-  if (!valueShape) {
-    // valueShape = Thing;
-  } else {
-  }
-  // let instanceValues = (
-  //   getShapeClass(valueShape.namedNode) as any
-  // ).getLocalInstances();
-
   const values = of[property.label];
   // let potentialValues = property.inList;
 

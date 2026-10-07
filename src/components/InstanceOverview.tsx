@@ -2,6 +2,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import type { ShapeInstancesQueryConfig } from '../shape/contracts.js';
 import type { PropertyShapeWire, NodeShapeWire } from '@_linked/core/shapes/nodeShapeWire';
 import { useDataManagerHost } from '../hostContext.js';
+import { useRelationShapeResolver } from '../shape/relationShape.js';
 import type { TableMode } from '../columns.js';
 import { getNodeDisplay } from '../shape/nodeDisplay.js';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -77,11 +78,12 @@ function InstanceOverview<
   // Pick mode is a host flow: the host knows where the picker was opened from and what to
   // do with the choice. This component only knows that a choice was made.
   //
-  // There is no fallback. The fallback was CN's sessionStorage-plus-router round trip,
+  // There is no fallback. The fallback was one host app's sessionStorage-plus-router round trip,
   // which is exactly the app-specific knowledge that has no business in a component meant
   // to run inside someone else's app — and holding on to it kept `routes.tsx` in the
   // import graph, which drags in the whole application.
   const host = useDataManagerHost();
+  const resolveRelation = useRelationShapeResolver();
 
   const handlePickInstance = (instance: { id: string; label: string; image?: string }) =>
     host.picking?.select([instance]);
@@ -169,11 +171,10 @@ function InstanceOverview<
   const __setConfig = setConfig || _setConfig;
 
   const handleNodeClick = (nodeValue: any, propertyName: string) => {
-    // Get the property details to access valueShape
-    const property = properties[propertyName];
-    if (property && property.valueShape && nodeValue.id) {
-      // Navigate to the view page for this node
-      host.navigate?.toInstance(property.valueShape.id, nodeValue.id);
+    // Open the node through the shape its relation resolves to; with none there is no view.
+    const shapeId = resolveRelation(properties[propertyName]).shapeId;
+    if (shapeId && nodeValue.id) {
+      host.navigate?.toInstance(shapeId, nodeValue.id);
     }
   };
 
@@ -226,6 +227,8 @@ function InstanceOverview<
       if (propShape.id === 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type') {
         return;
       }
+      // A relation without a shape still shows its values, but as references that go nowhere.
+      const linkable = !!resolveRelation(propShape).shapeId;
       columnConfig = {
         id: propShape.id,
         // accessorFn, NOT accessorKey: TanStack reads a key as a deep PATH, so a property
@@ -292,7 +295,7 @@ function InstanceOverview<
                 <NodeBadge
                   text={identifier}
                   onClick={() => handleNodeClick(value, propLabel)}
-                  clickable={true}
+                  clickable={linkable}
                 />
               );
             }
@@ -347,7 +350,8 @@ function InstanceOverview<
     });
   }
 
-  const columns = React.useMemo<ColumnDef<I>[]>(() => initialColumns, [properties]);
+  // The resolver changes when the host's catalog arrives, and the cells close over it.
+  const columns = React.useMemo<ColumnDef<I>[]>(() => initialColumns, [properties, resolveRelation]);
 
   return (
     <ReactTable

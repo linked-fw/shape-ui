@@ -3,7 +3,7 @@
  *
  * The point of this contract is what it does NOT contain: no project id, no branch, no
  * store, no dataset name. Routing is decided below the component by `LinkedStorage` —
- * `AppDataRouter` inside Create Now, the app's own default dataset in a standalone or
+ * a multi-project host's own router, the app's own default dataset in a standalone or
  * Capacitor build — so the component issues a Linked Query and never names a project.
  * Everything here is genuinely host-specific: where IRIs are minted, how the catalog is
  * found, and where a click should go.
@@ -21,7 +21,7 @@ export interface DataManagerNavigation {
 
 /**
  * "Pick mode" — the flow where a form asks the user to choose a related instance and
- * returns with it. Optional because it is a Create Now studio affordance; a standalone
+ * returns with it. Optional because it is a studio-style affordance; a standalone
  * app that has no such flow simply omits it, rather than being asked to stub it.
  */
 /** What a field needs the host to open a picker for. */
@@ -40,9 +40,9 @@ export interface PickRequest {
    * An opaque token the host must carry across the round trip and hand back on return.
    *
    * A field with unsaved work flushes it before the viewer leaves, and that flush yields
-   * an identifier — Create Now's draft id — without which the half-filled form is lost on
+   * an identifier — e.g. a host's draft id — without which the half-filled form is lost on
    * the way back. The field cannot store it itself; it is about to unmount. It is opaque
-   * here on purpose: how a host preserves it is its own business (Create Now puts it in
+   * here on purpose: how a host preserves it is its own business (a host may put it in
    * the return URL), and a host with no navigation to survive can ignore it.
    */
   resumeToken?: string;
@@ -51,7 +51,7 @@ export interface PickRequest {
 export interface DataManagerPicking {
   /**
    * A field is asking the viewer to choose. How that is presented is entirely the host's
-   * call — Create Now navigates to the overview in pick mode, a mobile app would open a
+   * call — a studio host may navigate to the overview in pick mode, a mobile app would open a
    * sheet — which is why this is a request rather than a URL.
    *
    * A host that omits `picking` gets a picker with no "browse all" affordance rather than
@@ -79,7 +79,7 @@ export interface DataManagerPicking {
    * A field that sends the viewer elsewhere to choose is unmounted by the time they do,
    * so the answer cannot be handed back through a callback — the field has to ask for it
    * when it mounts again. Which is why `open` and `select` alone were not enough: the
-   * component was reading Create Now's sessionStorage directly to close the loop.
+   * component was reading one host app's sessionStorage directly to close the loop.
    *
    * Returns only what belongs to THIS field: several relation fields can be on one form,
    * and the picked values must not land in the wrong one. Returns null when there is
@@ -115,8 +115,8 @@ export interface DataManagerHost {
   /**
    * Base IRI for minting new instance IRIs.
    *
-   * In Create Now this is the project's `dataRoot` — the ONE value in the catalog path
-   * that comes from cn-main rather than the app's own dataset. A standalone app knows its
+   * In a multi-project host this is typically the project's data root — the ONE value in the
+   * catalog path that comes from the host rather than the app's own dataset. A standalone app knows its
    * own domain and passes it from config, which is why this is a plain value here and not
    * a lookup.
    */
@@ -143,15 +143,18 @@ export interface DataManagerHost {
   /**
    * The whole catalog, when the host happens to have one.
    *
-   * Optional, and only a convenience: supplying it means `resolveShape` can be derived, so a
-   * host with a catalog need not write both.
+   * Optional. Supplying it means `resolveShape` can be derived, so a host with a catalog
+   * need not write both — and it makes the catalog the set a relation declared with
+   * `sh:class` alone resolves its shape among, in place of core's registry. While it loads,
+   * or if it rejects (logged), such a relation resolves to no shape rather than to a
+   * registry shape the host never offered.
    */
   resolveCatalog?(): Promise<Record<string, NodeShapeWire>>;
 
   /**
    * Find instances of a shape, for a relation field's picker.
    *
-   * A host concern because *how* you search is host-specific: Create Now asks its backend
+   * A host concern because *how* you search is host-specific: a multi-project host asks its backend
    * on behalf of a project, a standalone app queries its own dataset. What the picker needs
    * back is the same either way — id, a human label, optionally an image.
    */
@@ -194,8 +197,8 @@ export interface DataManagerHost {
    *
    * Optional, and filled in from the DSL when absent — like `searchInstances`, and for the
    * same reason: a form that cannot save unless the host wrote a create by hand is not
-   * "works standalone". Create Now overrides it only because its create also has to write
-   * a draft and record a projection edit, neither of which is a write concern.
+   * "works standalone". A host overrides it when its create also has to do host-side work
+   * (e.g. write a draft or record an edit), neither of which is a write concern.
    */
   createInstance?(
     shapeIri: string,
