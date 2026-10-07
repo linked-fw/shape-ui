@@ -22,7 +22,7 @@
  * query. That was never this package's fault — it was a live-binding bug in core's
  * `ShapeClass`, which captured `Shape` by named import before `Shape.js` had finished
  * evaluating, so the runtime subclass extended `undefined`. Fixed in `@_linked/core` 2.18.1
- * (linked-cm/core#220), which is why this package depends on `^2.18.1`.
+ * (linked-fw/core#220), which is why this package depends on `^2.18.1`.
  *
  * The empty ontology this package scaffolded from the template is gone: one export, no terms,
  * and a namespace on a domain we no longer use. Nothing referenced it.
