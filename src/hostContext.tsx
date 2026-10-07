@@ -15,9 +15,11 @@
 import {
   createContext,
   createElement,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -35,7 +37,9 @@ const HostContext = createContext<DataManagerHost>(nullHost());
  * - `none`: the host has no `resolveCatalog`. Lookups use core's shape registry.
  * - `loading`: the host has a catalog and it has not arrived yet.
  * - `loaded`: the catalog, as a list.
- * - `failed`: `resolveCatalog()` rejected (logged).
+ * - `failed`: `resolveCatalog()` rejected (logged). It is asked again with a backoff —
+ *   2s, doubling, at most 60s apart — and `retry()` asks again now. The state stays
+ *   `failed` while a retry is in flight, so a field does not flicker back to `loading`.
  *
  * Only `none` falls back to the registry. A host with a catalog has said which shapes count,
  * and the registry also holds compiled framework shapes for the same classes — so while the
@@ -46,7 +50,7 @@ export type HostCatalogState =
   | {status: 'none'}
   | {status: 'loading'}
   | {status: 'loaded'; shapes: readonly NodeShapeWire[]}
-  | {status: 'failed'};
+  | {status: 'failed'; retry: () => void};
 
 const NO_CATALOG: HostCatalogState = {status: 'none'};
 const LOADING: HostCatalogState = {status: 'loading'};
@@ -70,6 +74,11 @@ export function DataManagerHostProvider({
   );
 }
 
+/** First retry delay after `resolveCatalog()` rejects; doubles per consecutive failure. */
+const RETRY_BASE_MS = 2_000;
+/** The longest wait between retries. */
+const RETRY_MAX_MS = 60_000;
+
 /**
  * Load the host's catalog once per host, for lookups that have to answer synchronously.
  *
@@ -78,16 +87,28 @@ export function DataManagerHostProvider({
  * The catalog is loaded here, once, and every field reads the same list. The answer is
  * tagged with the host it came from so a host change never serves the previous project's
  * catalog while the next one loads: until the new host's answer arrives it is `loading`.
+ *
+ * A rejection is retried with a backoff rather than kept. A host is typically stable for
+ * the whole session, so a `failed` that lasted until the host changed turned one transient
+ * error into class-only relations without a shape until a reload. The backoff resets on
+ * success and on a host change; the pending retry is cancelled on unmount and host change.
  */
 function useLoadedCatalog(host: DataManagerHost): HostCatalogState {
   const [settled, setSettled] = useState<{host: DataManagerHost; state: HostCatalogState}>();
+  // Bumped to ask again, by the backoff timer or by `retry()`.
+  const [attempt, setAttempt] = useState(0);
+  const failures = useRef<{host: DataManagerHost; count: number}>({host, count: 0});
+  const retry = useCallback(() => setAttempt((n) => n + 1), []);
 
   useEffect(() => {
     if (!host.resolveCatalog) return;
+    if (failures.current.host !== host) failures.current = {host, count: 0};
     let current = true;
+    let timer: ReturnType<typeof setTimeout> | undefined;
     host.resolveCatalog().then(
       (catalog) => {
         if (!current) return;
+        failures.current = {host, count: 0};
         // A host that answers with nothing has no catalog after all: the registry applies.
         setSettled({
           host,
@@ -97,18 +118,26 @@ function useLoadedCatalog(host: DataManagerHost): HostCatalogState {
       (error) => {
         // Not swallowed: a failed catalog leaves every class-only relation without a shape,
         // and the only trace of why must not be an absence.
+        if (!current) {
+          console.error('[shape-ui] DataManagerHost.resolveCatalog() rejected.', error);
+          return;
+        }
+        const delay = Math.min(RETRY_BASE_MS * 2 ** failures.current.count, RETRY_MAX_MS);
+        failures.current = {host, count: failures.current.count + 1};
         console.error(
           '[shape-ui] DataManagerHost.resolveCatalog() rejected; relations declared with ' +
-            'sh:class only resolve to no shape until the host changes.',
+            `sh:class only resolve to no shape until it succeeds. Retrying in ${delay / 1000}s.`,
           error,
         );
-        if (current) setSettled({host, state: {status: 'failed'}});
+        setSettled({host, state: {status: 'failed', retry}});
+        timer = setTimeout(retry, delay);
       },
     );
     return () => {
       current = false;
+      if (timer !== undefined) clearTimeout(timer);
     };
-  }, [host]);
+  }, [host, attempt, retry]);
 
   if (!host.resolveCatalog) return NO_CATALOG;
   return settled?.host === host ? settled.state : LOADING;
@@ -116,7 +145,8 @@ function useLoadedCatalog(host: DataManagerHost): HostCatalogState {
 
 /**
  * Where the host's catalog stands — see `HostCatalogState`. Use it to tell "no shape yet"
- * (`loading`) from "no shape" when that matters to what a component shows.
+ * (`loading`) from "no shape" when that matters to what a component shows. On `failed`,
+ * `retry()` asks the host again now instead of waiting for the next backoff step.
  */
 export function useHostCatalogState(): HostCatalogState {
   return useContext(CatalogContext);
