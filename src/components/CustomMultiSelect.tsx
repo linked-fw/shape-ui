@@ -7,7 +7,7 @@ import { Shape } from '@_linked/core/shapes/Shape';
 import { cl } from '@_linked/react/utils/ClassNames';
 import { getNodeDisplay } from '../shape/nodeDisplay.js';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useDataManagerHost, useHostCatalog } from '../hostContext.js';
+import { useDataManagerHost, useHostCatalog, useHostCatalogLoading } from '../hostContext.js';
 import { useRelationShape } from '../shape/relationShape.js';
 import { formatShapeLabel } from '../shape/naming.js';
 import { Icons } from '@_linked/icons';
@@ -81,6 +81,9 @@ const CustomMultiSelect = ({
   // names a class and no shape.
   const relationShapeId = useRelationShape(property).shapeId;
   const catalog = useHostCatalog();
+  // A class-only relation has no shape until the host's catalog arrives; say so rather than
+  // showing the same "-" as a relation that will never have one.
+  const catalogLoading = useHostCatalogLoading();
   const relationShapeLabel = relationShapeId
     ? catalog?.find((s) => s.id === relationShapeId)?.label
     : undefined;
@@ -345,11 +348,11 @@ const CustomMultiSelect = ({
   // No shape to search, pick or create through: show what is there as plain references.
   if (!relationShapeId) {
     return (
-      <div className={style.Root}>
+      <div className={style.Root} aria-busy={catalogLoading || undefined}>
         {comboboxValues.length > 0 ? (
           comboboxValues.map((val) => <NodeBadge key={val.id} text={val.label || val.id} />)
         ) : (
-          <p className={style.selectorButton}>-</p>
+          <p className={style.selectorButton}>{catalogLoading ? '…' : '-'}</p>
         )}
       </div>
     );

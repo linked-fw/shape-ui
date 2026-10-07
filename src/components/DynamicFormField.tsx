@@ -147,6 +147,11 @@ function DynamicForm({
   // time. Same answer, computed in one place.
   const choices = enumOptions(property);
   if (choices.length > 0) {
+    // A relation's member is a node, so it is written as a reference. A bare string on a
+    // `sh:class`/`sh:node`/IRI property is a literal, and validation rejects it on save.
+    const relation = isRelation(property);
+    const toFieldValue = (selected: string) =>
+      selected ? (relation ? { id: selected } : selected) : undefined;
     const currentValue =
       value !== undefined && value !== null
         ? typeof value === 'object' && value.id
@@ -160,9 +165,9 @@ function DynamicForm({
           required={required}
           defaultValue={currentValue}
           onChange={(e) => {
-            of[property.label] = e.target.value || undefined;
+            of[property.label] = toFieldValue(e.target.value);
           }}
-          onBlur={(e) => handleBlur(e.target.value)}
+          onBlur={(e) => handleBlur(toFieldValue(e.target.value))}
         >
           <option value="">— Select —</option>
           {choices.map((opt) => (

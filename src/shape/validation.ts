@@ -1,6 +1,7 @@
 import {enumOptions} from './nodeDisplay.js';
 import type { PropertyShapeWire } from '@_linked/core/shapes/nodeShapeWire';
 import { shacl } from '@_linked/core/ontologies/shacl';
+import { isRelation } from '@_linked/core/shapes/relationShape';
 
 export interface FieldError {
   propertyLabel: string;
@@ -16,10 +17,9 @@ export function validateField(
   value: any,
 ): string {
   const nodeKind = property.nodeKind?.id;
-  const isIRI =
-    nodeKind === shacl.IRI.id ||
-    nodeKind === shacl.BlankNode.id ||
-    nodeKind === shacl.BlankNodeOrIRI.id;
+  // Node-valued by the same rule core's validation uses: a node kind other than literal,
+  // or a `sh:node` / `sh:class` — whose values are references (`{id}`), not strings.
+  const isIRI = isRelation(property);
 
   // Required check (minCount > 0)
   if (property.minCount > 0) {

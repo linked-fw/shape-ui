@@ -10,6 +10,11 @@
  * the `sh:class`). What this module adds is WHICH shapes it chooses among: the host's
  * catalog when there is one, because core's registry also holds compiled framework shapes
  * for the same classes. Without a catalog the registry is all there is.
+ *
+ * A host that HAS a catalog never falls back to the registry — not while the catalog is
+ * loading, and not after it failed. A class-only relation then resolves to no shape (a
+ * declared `sh:node` still resolves: it names its shape and consults no set). See
+ * `HostCatalogState`.
  */
 
 import {useCallback, useMemo} from 'react';
@@ -18,9 +23,13 @@ import {
   type RelationPropertyLike,
   type RelationShapeResolution,
 } from '@_linked/core/shapes/relationShape';
-import {useHostCatalog} from '../hostContext.js';
+import type {NodeShapeWire} from '@_linked/core/shapes/nodeShapeWire';
+import {useHostCatalogState} from '../hostContext.js';
 
 const UNRESOLVED: RelationShapeResolution = {candidates: [], source: 'none'};
+
+/** Stands in for a catalog that is not there yet (or failed): nothing to choose among. */
+const NO_CANDIDATES: readonly NodeShapeWire[] = [];
 
 /**
  * A resolver bound to the host's catalog, for code that resolves per call — a click
@@ -29,10 +38,18 @@ const UNRESOLVED: RelationShapeResolution = {candidates: [], source: 'none'};
 export function useRelationShapeResolver(): (
   property: RelationPropertyLike | undefined,
 ) => RelationShapeResolution {
-  const catalog = useHostCatalog();
+  const state = useHostCatalogState();
+  // `undefined` means "resolve against the registry", which is right only for a host with
+  // no catalog at all.
+  const shapes =
+    state.status === 'loaded'
+      ? state.shapes
+      : state.status === 'none'
+        ? undefined
+        : NO_CANDIDATES;
   return useCallback(
-    (property) => (property ? resolveRelationShape(property, catalog) : UNRESOLVED),
-    [catalog],
+    (property) => (property ? resolveRelationShape(property, shapes) : UNRESOLVED),
+    [shapes],
   );
 }
 

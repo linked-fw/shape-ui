@@ -29,8 +29,29 @@ import {createInstanceWithDsl, updateInstanceWithDsl} from './write.js';
 
 const HostContext = createContext<DataManagerHost>(nullHost());
 
-/** The host's catalog as a list, once loaded; `undefined` while loading or when it has none. */
-const CatalogContext = createContext<readonly NodeShapeWire[] | undefined>(undefined);
+/**
+ * Where the host's catalog stands.
+ *
+ * - `none`: the host has no `resolveCatalog`. Lookups use core's shape registry.
+ * - `loading`: the host has a catalog and it has not arrived yet.
+ * - `loaded`: the catalog, as a list.
+ * - `failed`: `resolveCatalog()` rejected (logged).
+ *
+ * Only `none` falls back to the registry. A host with a catalog has said which shapes count,
+ * and the registry also holds compiled framework shapes for the same classes — so while the
+ * catalog loads, or after it failed, resolving against the registry would pick a shape the
+ * host never offered, and a link or picker built on it would point outside the project.
+ */
+export type HostCatalogState =
+  | {status: 'none'}
+  | {status: 'loading'}
+  | {status: 'loaded'; shapes: readonly NodeShapeWire[]}
+  | {status: 'failed'};
+
+const NO_CATALOG: HostCatalogState = {status: 'none'};
+const LOADING: HostCatalogState = {status: 'loading'};
+
+const CatalogContext = createContext<HostCatalogState>(NO_CATALOG);
 
 export interface DataManagerHostProviderProps {
   host: DataManagerHost;
@@ -56,40 +77,66 @@ export function DataManagerHostProvider({
  * a picker, a link, a create button — so it cannot wait on `resolveCatalog()` at each field.
  * The catalog is loaded here, once, and every field reads the same list. The answer is
  * tagged with the host it came from so a host change never serves the previous project's
- * catalog while the next one loads.
+ * catalog while the next one loads: until the new host's answer arrives it is `loading`.
  */
-function useLoadedCatalog(host: DataManagerHost): readonly NodeShapeWire[] | undefined {
-  const [loaded, setLoaded] = useState<{
-    host: DataManagerHost;
-    shapes: readonly NodeShapeWire[];
-  }>();
+function useLoadedCatalog(host: DataManagerHost): HostCatalogState {
+  const [settled, setSettled] = useState<{host: DataManagerHost; state: HostCatalogState}>();
 
   useEffect(() => {
     if (!host.resolveCatalog) return;
     let current = true;
     host.resolveCatalog().then(
       (catalog) => {
-        if (current && catalog) setLoaded({host, shapes: Object.values(catalog)});
+        if (!current) return;
+        // A host that answers with nothing has no catalog after all: the registry applies.
+        setSettled({
+          host,
+          state: catalog ? {status: 'loaded', shapes: Object.values(catalog)} : NO_CATALOG,
+        });
       },
-      // A catalog that fails to load leaves lookups on the registry, as for a host with none.
-      () => undefined,
+      (error) => {
+        // Not swallowed: a failed catalog leaves every class-only relation without a shape,
+        // and the only trace of why must not be an absence.
+        console.error(
+          '[shape-ui] DataManagerHost.resolveCatalog() rejected; relations declared with ' +
+            'sh:class only resolve to no shape until the host changes.',
+          error,
+        );
+        if (current) setSettled({host, state: {status: 'failed'}});
+      },
     );
     return () => {
       current = false;
     };
   }, [host]);
 
-  return loaded?.host === host ? loaded.shapes : undefined;
+  if (!host.resolveCatalog) return NO_CATALOG;
+  return settled?.host === host ? settled.state : LOADING;
+}
+
+/**
+ * Where the host's catalog stands — see `HostCatalogState`. Use it to tell "no shape yet"
+ * (`loading`) from "no shape" when that matters to what a component shows.
+ */
+export function useHostCatalogState(): HostCatalogState {
+  return useContext(CatalogContext);
+}
+
+/** True while the host's catalog is on its way; class-only relations resolve to no shape meanwhile. */
+export function useHostCatalogLoading(): boolean {
+  return useContext(CatalogContext).status === 'loading';
 }
 
 /**
  * The host's catalog, when it has one and it has loaded.
  *
- * `undefined` means "no catalog to resolve against" — lookups then fall back to core's
- * shape registry. Not the same as an empty list, which is a catalog with nothing in it.
+ * `undefined` while it loads, when it failed, and when the host has none — use
+ * `useHostCatalogState` to tell those apart. Not the same as an empty list, which is a
+ * catalog with nothing in it.
  */
 export function useHostCatalog(): readonly NodeShapeWire[] | undefined {
-  return useContext(CatalogContext);
+  const state = useContext(CatalogContext);
+  return state.status === 'loaded' ? state.shapes : undefined;
 }
 
 /**

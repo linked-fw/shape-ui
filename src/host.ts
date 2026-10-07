@@ -143,8 +143,11 @@ export interface DataManagerHost {
   /**
    * The whole catalog, when the host happens to have one.
    *
-   * Optional, and only a convenience: supplying it means `resolveShape` can be derived, so a
-   * host with a catalog need not write both.
+   * Optional. Supplying it means `resolveShape` can be derived, so a host with a catalog
+   * need not write both — and it makes the catalog the set a relation declared with
+   * `sh:class` alone resolves its shape among, in place of core's registry. While it loads,
+   * or if it rejects (logged), such a relation resolves to no shape rather than to a
+   * registry shape the host never offered.
    */
   resolveCatalog?(): Promise<Record<string, NodeShapeWire>>;
 
