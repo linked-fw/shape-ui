@@ -8,6 +8,7 @@ import type {
 import {NodeBadge} from './NodeBadge.js';
 import ImageThumb from '@_linked/primitives/components/ImageThumb';
 import {getNodeDisplay} from '../shape/nodeDisplay.js';
+import {useRelationShapeResolver} from '../shape/relationShape.js';
 import {
   getTransition,
   staggerContainer,
@@ -52,6 +53,9 @@ export function InstanceView({
 }: InstanceViewProps) {
   const [expandedArrays, setExpandedArrays] = useState<Set<string>>(new Set());
   const reducedMotion = useReducedMotion();
+  const resolveRelation = useRelationShapeResolver();
+  // A related node links only when its relation resolves to a shape it can be opened through.
+  const linkable = (propertyName: string) => !!resolveRelation(properties[propertyName]).shapeId;
 
   const expand = (propertyName: string) =>
     setExpandedArrays((prev) => new Set(prev).add(propertyName));
@@ -92,7 +96,7 @@ export function InstanceView({
           <NodeBadge
             text={item.label || item.id}
             onClick={() => handleNodeClick(item, propertyName)}
-            clickable
+            clickable={linkable(propertyName)}
           />
         </div>
       );
@@ -118,7 +122,7 @@ export function InstanceView({
       );
     }
 
-    // A related node: show its image if it has one, else a clickable badge.
+    // A related node: show its image if it has one, else a badge (clickable when linkable).
     if (typeof value === 'object' && value.id) {
       const imgSrc = imageSourceOf(value);
       if (imgSrc) {
@@ -133,7 +137,7 @@ export function InstanceView({
         <NodeBadge
           text={getNodeDisplay(value)}
           onClick={() => handleNodeClick(value, propertyName)}
-          clickable
+          clickable={linkable(propertyName)}
         />
       );
     }
