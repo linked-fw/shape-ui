@@ -2,10 +2,37 @@
 '@_linked/shape-ui': minor
 ---
 
-A relation field now finds the shape its values go through in one place, and a relation declared with `sh:class` alone works. Search, browse, load-more, pick mode, inline create, the overview's node links and the form field all ask `useRelationShape` / `useRelationShapeResolver` (new exports), which use core's `resolveRelationShape`: a declared `sh:node` wins, otherwise the shapes targeting the `sh:class` are candidates. Candidates come from the host's catalog when it supplies `resolveCatalog` — loaded once by `DataManagerHostProvider` and readable with the new `useHostCatalog`, `useHostCatalogState` and `useHostCatalogLoading` — and from core's shape registry only when the host has no `resolveCatalog`. While a host's catalog is loading, or after `resolveCatalog()` rejected (now logged with `console.error`), a `sh:class`-only relation resolves to no shape rather than to a registry shape the host never offered. A rejected catalog is asked for again with a backoff (2s, doubling, capped at 60s; reset on success) up to 6 times, after which it stays `failed` and the give-up is logged once; the `failed` state — one object for as long as the catalog keeps failing, so retries do not re-render its readers — carries a `retry()` to ask again immediately, including after the automatic retries have stopped. A relation that resolves to no shape renders its values as plain references, read-only, with no picker, search, create or link (`…` while the catalog is still loading). `InstanceView` follows the same rule: a related node's badge is clickable only when its relation resolves to a shape.
+Relation fields now support relations declared with `sh:class` alone. Every part of a relation field resolves its shape in the same way: search, browse, load more, pick mode, inline create, links in the overview and in `InstanceView`, and the form field.
 
-What counts as a relation is core's `isRelation`: `sh:node`, `sh:class`, or a node kind of IRI / blank node. A property with only `sh:nodeKind sh:IRI` (no `sh:node` or `sh:class`) is therefore a relation too — it renders through the relation field, and with no shape to resolve it is read-only in forms and no longer shown in the `cell` display context. An `sh:in` dropdown on a relation now writes the chosen member as a reference (`{id}`) instead of a bare string, and field validation checks it as one, so a `sh:class`-only `sh:in` property no longer fails validation on save.
+New exports from `@_linked/shape-ui`:
 
-Inline create now asks the host for a form for the **related** shape. It was passed the shape of the form being edited, so "Create New" in a relation field created another instance of the owner and linked that as the value.
+- `useRelationShape(property)`: the shape a relation's values are searched, picked, created and opened through. It returns core's `RelationShapeResolution` (`{shapeId?, candidates, source}`).
+- `useRelationShapeResolver()`: the same lookup as a function, for click handlers and cell renderers.
+- `useHostCatalog()`: the host's catalog as a list once it has loaded, otherwise `undefined`.
+- `useHostCatalogState()`: one of `none`, `loading`, `loaded` (with `shapes`) or `failed` (with `retry()`). It is exported with the `HostCatalogState` type.
+- `useHostCatalogLoading()`: true while the host's catalog is loading.
 
-Requires `@_linked/core` ^2.26.0 for `@_linked/core/shapes/relationShape`.
+```tsx
+import {useRelationShape, useHostCatalogState} from '@_linked/shape-ui';
+
+function RelationTarget({property}) {
+  const {shapeId} = useRelationShape(property);
+  const catalog = useHostCatalogState();
+  if (shapeId) return <span>{shapeId}</span>;
+  if (catalog.status === 'failed') return <button onClick={catalog.retry}>Retry</button>;
+  return <span>{catalog.status === 'loading' ? '…' : 'No shape'}</span>;
+}
+```
+
+The rule comes from core's `resolveRelationShape`: a declared `sh:node` wins, and otherwise the least specific shapes that target the `sh:class` are the candidates. When the host supplies `resolveCatalog`, `DataManagerHostProvider` loads the catalog once and the candidates come from it. Core's shape registry is used only when the host has no `resolveCatalog`.
+
+Behaviour changes:
+
+- While the host's catalog is loading, or after it failed, a `sh:class`-only relation resolves to no shape. It does not fall back to a registry shape the host never offered.
+- A rejected `resolveCatalog()` is now logged and retried with a backoff (2s, doubling, capped at 60s) up to 6 times. After that it stays `failed` until `retry()` is called. The `failed` state is one stable object, so retries do not re-render the components that read it.
+- A relation that resolves to no shape shows its values as plain, read-only references. It has no picker, search, create or link, and shows `…` while the catalog is loading. A related node's badge in `InstanceOverview` and `InstanceView` is clickable only when its relation resolves to a shape.
+- Every relation check now uses core's `isRelation`, so a property that has only `sh:nodeKind sh:IRI` is a relation. It renders through the relation field. With no shape it is read-only in forms, and it is no longer shown in the `cell` display context.
+- An `sh:in` dropdown on a relation now writes the chosen member as a reference (`{id}`) rather than a string, and field validation expects a reference. A `sh:class`-only `sh:in` property no longer fails validation on save.
+- Fix: inline create ("Create New" in a relation field) now asks the host for a form for the related shape. Before, it was given the shape of the form being edited, so it created another instance of the owner and linked that as the value.
+
+Requires `@_linked/core` ^2.26.0.

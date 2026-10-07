@@ -78,7 +78,7 @@ function InstanceOverview<
   // Pick mode is a host flow: the host knows where the picker was opened from and what to
   // do with the choice. This component only knows that a choice was made.
   //
-  // There is no fallback. The fallback was CN's sessionStorage-plus-router round trip,
+  // There is no fallback. The fallback was one host app's sessionStorage-plus-router round trip,
   // which is exactly the app-specific knowledge that has no business in a component meant
   // to run inside someone else's app — and holding on to it kept `routes.tsx` in the
   // import graph, which drags in the whole application.

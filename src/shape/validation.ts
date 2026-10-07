@@ -17,8 +17,8 @@ export function validateField(
   value: any,
 ): string {
   const nodeKind = property.nodeKind?.id;
-  // Node-valued by the same rule core's validation uses: a node kind other than literal,
-  // or a `sh:node` / `sh:class` — whose values are references (`{id}`), not strings.
+  // Node-valued when core's `isRelation` says so — an IRI / blank-node node kind, or a
+  // `sh:node` / `sh:class` — so its values are references (`{id}`), not strings.
   const isIRI = isRelation(property);
 
   // Required check (minCount > 0)

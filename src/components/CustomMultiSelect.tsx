@@ -24,8 +24,8 @@ interface CustomMultiSelectProps {
    * picked from. Needed for the pick-mode round-trip, which has to know where to return to.
    *
    * Supply these instead of letting the component read the route: it used to derive both
-   * from `useParams().shape_uri` plus CN's settings context, which assumed CN's URL layout
-   * for a value every caller already holds.
+   * from `useParams().shape_uri` plus one host app's settings context, which assumed that
+   * app's URL layout for a value every caller already holds.
    */
   sourceShape?: NodeShapeWire;
   sourceShapeUri?: string;
@@ -68,7 +68,7 @@ const CustomMultiSelect = ({
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // The shape being edited arrives as a prop. It used to be read from the route
   // (`useParams().shape_uri` + `getShapeFromParams(..., projectConfig)`), which assumed
-  // CN's URL layout AND CN's settings context — two couplings for one value every caller
+  // one host app's URL layout AND its settings context — two couplings for one value every caller
   // already has in hand.
   const shape_uri = sourceShapeUri ?? sourceShape?.id;
   // The host supplies searching, inline creation and navigation. The picker used to reach
@@ -131,8 +131,8 @@ const CustomMultiSelect = ({
   //
   // This field sent the viewer away to choose and was unmounted while they did, so the
   // answer cannot arrive through a callback — it has to be collected on the way back in.
-  // Where it was kept is the host's business; this used to read CN's sessionStorage
-  // directly, which is why the component only worked inside Create Now.
+  // Where it was kept is the host's business; this used to read one host app's
+  // sessionStorage directly, which is why the component only worked inside that app.
   useEffect(() => {
     if (!property?.label) return;
     const pickedItems = host.picking?.takeResult({
@@ -318,7 +318,7 @@ const CustomMultiSelect = ({
     } else if (relationShapeId) {
       // Flush draft to server before navigating away — returns the draftId
       const flushedDraftId = await onBeforeNavigate?.();
-      // How "browse all of these" is presented is the host's decision — Create Now
+      // How "browse all of these" is presented is the host's decision — one host
       // navigates to the overview in pick mode; another host might open a sheet. The
       // flushed draft id rides along as the resume token so the half-filled form survives
       // whatever round trip the host chooses.
