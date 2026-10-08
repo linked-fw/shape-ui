@@ -1,5 +1,11 @@
 # @\_linked/ui
 
+## 2.6.1
+
+### Patch Changes
+
+- [#56](https://github.com/linked-fw/shape-ui/pull/56) [`c1e4501`](https://github.com/linked-fw/shape-ui/commit/c1e4501041403c0974195211b551d37f4367bd6b) Thanks [@flyon](https://github.com/flyon)! - Publish only the files consumers need; the tarball no longer includes the test files under `src/`.
+
 ## 2.6.0
 
 ### Minor Changes
