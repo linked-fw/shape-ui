@@ -1,5 +1,11 @@
 # @\_linked/ui
 
+## 2.6.2
+
+### Patch Changes
+
+- [#52](https://github.com/linked-fw/shape-ui/pull/52) [`3ed0a81`](https://github.com/linked-fw/shape-ui/commit/3ed0a81773a1157efe979faeb04625552306a30e) Thanks [@flyon](https://github.com/flyon)! - The types now admit the empty values these components already handle. `formatShapeLabel` accepts `null` and `undefined` and formats a missing label to `''`; it used to return the falsy input unchanged, which put `undefined` into strings like "New undefined". `InstanceOverview`'s `properties` may be `null` while the shape is loading, which the table already supported; `ReactTable`'s `properties` accepts `null` for the same reason. The node-click handler now tolerates that too. `InstanceView`'s `properties` is optional and nullable, and with none no related node links. `EditInstanceForms` never reads `properties`, so there the prop is optional, nullable and deprecated. Apps compiled with `strictNullChecks` no longer need fallbacks to call any of them.
+
 ## 2.6.1
 
 ### Patch Changes
