@@ -1,7 +1,7 @@
 /**
  * CSS modules, for the compiler.
  *
- * `tsc` only COPIES these into `lib` (see `copy-to-lib`); the class-name hashing and scoping is
+ * `linked build` only COPIES these into `lib`; the class-name hashing and scoping is
  * the consuming bundler's job, as in `@_linked/primitives`. A consumer therefore needs a
  * bundler that understands CSS modules — which any app rendering these components already has.
  *

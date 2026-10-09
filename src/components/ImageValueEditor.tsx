@@ -9,10 +9,7 @@ import { getShapeClass } from '@_linked/core/utils/ShapeClass';
 import { ShapeSet } from '@_linked/core/collections/ShapeSet';
 import { ImageUploader } from '@_linked/schema/components/ImageUploader';
 import { ImageObject } from '@_linked/schema/shapes/ImageObject';
-import {
-  generateRandomName,
-  replaceLocalhostWithSiteRoot,
-} from '../utils/helper.js';
+import { generateRandomName } from '../utils/helper.js';
 
 // interface ImageValuesEditor {
 //   shape?: Shape;
