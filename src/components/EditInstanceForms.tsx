@@ -29,7 +29,8 @@ interface EditInstanceFormsProps {
   onSave?: (data: Record<string, any>) => Promise<void>;
   onCancel?: () => void;
   shape: NodeShapeWire;
-  properties: Record<string, PropertyShapeWire>;
+  /** @deprecated Not read by this component; it will be removed. */
+  properties?: Record<string, PropertyShapeWire> | null;
   allShapes?: Record<string, NodeShapeWire>;
   projectId?: string;
   propertyUsage?: Record<string, PropertyUsageData> | null;

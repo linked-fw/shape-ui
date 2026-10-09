@@ -70,7 +70,8 @@ export interface ReactTableProps {
   removeFromSelection: (uris: string[]) => void;
   hasSelection: boolean;
   shape: NodeShapeWire;
-  properties?: Record<string, PropertyShapeWire>;
+  /** `null` or absent while the shape's properties load; the table then has no columns. */
+  properties?: Record<string, PropertyShapeWire> | null;
   isLoading?: boolean;
   config: ShapeInstancesQueryConfig;
   setConfig: (updated: ShapeInstancesQueryConfig) => void;

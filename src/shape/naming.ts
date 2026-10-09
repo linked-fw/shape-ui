@@ -12,10 +12,11 @@
  *
  * `actionPlan` → `Action Plan`, and `HTMLParser` → `HTML Parser` — the second rule exists
  * because the naive lowercase-to-uppercase split turns an acronym into `H T M L Parser`.
- * Already-spaced and lowercase-only strings pass through unharmed.
+ * Already-spaced and lowercase-only strings pass through unharmed. A missing label formats to
+ * `''`, so a caller can interpolate the result without leaking `undefined` into the UI.
  */
-export function formatShapeLabel(str: string): string {
-  if (!str) return str;
+export function formatShapeLabel(str: string | null | undefined): string {
+  if (!str) return '';
   return str
     .replace(/([a-z])([A-Z])/g, '$1 $2')
     .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
