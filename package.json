@@ -43,7 +43,7 @@
     "@changesets/cli": "^3.0.0",
     "@types/node": "^24.0.0",
     "@types/react": "^19.3.0",
-    "framer-motion": "^13.0.0",
+    "framer-motion": "^14.0.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "tsconfig-to-dual-package": "^1.2.0",
