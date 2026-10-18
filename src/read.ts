@@ -20,6 +20,7 @@ import type {
   NodeShapeWire,
   PropertyShapeWire,
 } from '@_linked/core/shapes/nodeShapeWire';
+import {buildInCatalog, type CatalogOptions} from './catalogScope.js';
 import {columnsFor, type DisplayContext} from './columns.js';
 
 /**
@@ -79,13 +80,14 @@ export interface InstanceRows {
 /**
  * Instances of one shape.
  *
- * The shape must already be registered — call `loadShapeCatalog` first. That is deliberate
- * rather than convenient: registering inside the query would hide a catalog read behind
- * every table refresh.
+ * The shape must be in `options.catalog` when one is given, else already registered — call
+ * `loadShapeCatalog` first. That is deliberate rather than convenient: registering inside the
+ * query would hide a catalog read behind every table refresh.
  */
 export async function selectInstances(
   shape: NodeShapeWire,
   query: InstanceQuery = {},
+  options?: CatalogOptions,
 ): Promise<InstanceRows> {
   const properties =
     query.properties ??
@@ -100,16 +102,18 @@ export async function selectInstances(
   // `any` on the proxy parameter is the established form for a runtime shape: the shape
   // is not a compiled class, so there is no generated type for the builder to infer from.
   // The property labels are the contract, and they come from the shape itself.
-  let builder = SelectBuilder.from(shape.id).select((instance: any) =>
-    properties.map((property) => instance[property.label]),
-  ) as unknown as {
-    limit(n: number): unknown;
-    offset(n: number): unknown;
-    exec(): Promise<Record<string, unknown>[]>;
-  };
-
-  if (query.limit != null) builder = builder.limit(query.limit) as typeof builder;
-  if (query.offset != null) builder = builder.offset(query.offset) as typeof builder;
+  const builder = buildInCatalog(options, () => {
+    let built = SelectBuilder.from(shape.id).select((instance: any) =>
+      properties.map((property) => instance[property.label]),
+    ) as unknown as {
+      limit(n: number): unknown;
+      offset(n: number): unknown;
+      exec(): Promise<Record<string, unknown>[]>;
+    };
+    if (query.limit != null) built = built.limit(query.limit) as typeof built;
+    if (query.offset != null) built = built.offset(query.offset) as typeof built;
+    return built;
+  });
 
   const rows = await builder.exec();
   return {rows: keyByLabel(rows ?? [], properties), properties};
@@ -125,6 +129,7 @@ export async function selectInstance(
   shape: NodeShapeWire,
   instanceId: string,
   query: InstanceQuery = {},
+  options?: CatalogOptions,
 ): Promise<{row: Record<string, unknown> | null; properties: PropertyShapeWire[]}> {
   const properties =
     query.properties ??
@@ -132,17 +137,18 @@ export async function selectInstance(
 
   if (properties.length === 0) return {row: null, properties};
 
-  const rows = (await (
-    SelectBuilder.from(shape.id).select((instance: any) =>
-      properties.map((property) => instance[property.label]),
-    ) as unknown as {
-      where(fn: (i: any) => unknown): {
-        exec(): Promise<Record<string, unknown>[]>;
-      };
-    }
-  )
-    .where((instance: any) => instance.equals({id: instanceId}))
-    .exec()) as Record<string, unknown>[];
+  const builder = buildInCatalog(options, () =>
+    (
+      SelectBuilder.from(shape.id).select((instance: any) =>
+        properties.map((property) => instance[property.label]),
+      ) as unknown as {
+        where(fn: (i: any) => unknown): {
+          exec(): Promise<Record<string, unknown>[]>;
+        };
+      }
+    ).where((instance: any) => instance.equals({id: instanceId})),
+  );
+  const rows = (await builder.exec()) as Record<string, unknown>[];
 
   return {row: keyByLabel(rows ?? [], properties)[0] ?? null, properties};
 }

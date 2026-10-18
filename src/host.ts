@@ -10,6 +10,7 @@
  */
 
 import type {NodeShapeWire} from '@_linked/core/shapes/nodeShapeWire';
+import type {ShapeCatalog} from '@_linked/core/utils/ShapeCatalog';
 import type {ReactNode} from 'react';
 
 /** Where a host sends the viewer when they act on a row. */
@@ -150,6 +151,26 @@ export interface DataManagerHost {
    * registry shape the host never offered.
    */
   resolveCatalog?(): Promise<Record<string, NodeShapeWire>>;
+
+  /**
+   * The shapes every query this package builds resolves against.
+   *
+   * Optional. Without it, a shape is registered in core's global registry as it is resolved
+   * (`registerRuntimeShapes`), which is enough for an app with one set of shapes. A host that
+   * serves several projects, or several branches of one, holds the same shape IRI with
+   * different properties at once, and one process-wide registry cannot hold both. Such a host
+   * returns the `ShapeCatalog` for its current scope instead: every read, search, create and
+   * update is then built inside `withShapeCatalog(catalog, …)`, and nothing is registered.
+   *
+   * Asked once per host object, retried with a backoff when it rejects. While it loads, the
+   * defaults wait for it; after it failed, they reject rather than fall back to the registry,
+   * which would resolve the shape the host did not offer. The host object is the identity:
+   * a host for another scope must be a new object.
+   *
+   * `resolveShape` and `resolveCatalog` still serve the wires the components display from;
+   * a host with a catalog keeps them.
+   */
+  resolveShapeCatalog?(): Promise<ShapeCatalog>;
 
   /**
    * Find instances of a shape, for a relation field's picker.

@@ -20,6 +20,8 @@ const offsetMock = jest.fn();
 const execMock = jest.fn<() => Promise<Record<string, unknown>[]>>();
 
 jest.unstable_mockModule('@_linked/core/queries/QueryBuilder', () => ({
+  // Core's own modules import this name from the same module; they are loaded, not used.
+  QueryBuilder: class {},
   SelectBuilder: {
     from: (...args: unknown[]) => {
       fromMock(...args);

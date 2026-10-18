@@ -49,6 +49,7 @@ export {
   useHostCatalog,
   useHostCatalogLoading,
   useHostCatalogState,
+  useHostShapeCatalog,
   type HostCatalogState,
 } from './hostContext.js';
 export {useRelationShape, useRelationShapeResolver} from './shape/relationShape.js';
@@ -72,6 +73,7 @@ export {
 } from './columns.js';
 
 export {narrowSuggestions, searchInstancesWithDsl} from './search.js';
+export type {CatalogOptions} from './catalogScope.js';
 
 // ─── Components ──────────────────────────────────────────────────────────────
 //
