@@ -18,6 +18,7 @@
 import {CreateBuilder} from '@_linked/core/queries/CreateBuilder';
 import {UpdateBuilder} from '@_linked/core/queries/UpdateBuilder';
 import type {NodeShapeWire} from '@_linked/core/shapes/nodeShapeWire';
+import {buildInCatalog, type CatalogOptions} from './catalogScope.js';
 
 /** A form's values, keyed by property label. */
 export type InstanceValues = Record<string, unknown>;
@@ -73,7 +74,7 @@ export function mintInstanceIri(shape: NodeShapeWire, dataRoot?: string): string
 export async function createInstanceWithDsl(
   shape: NodeShapeWire,
   values: InstanceValues,
-  options: {dataRoot?: string; id?: string} = {},
+  options: {dataRoot?: string; id?: string} & CatalogOptions = {},
 ): Promise<{id: string}> {
   const known = knownLabels(shape);
   const data: Record<string, unknown> = {};
@@ -84,7 +85,10 @@ export async function createInstanceWithDsl(
   }
 
   const id = options.id ?? mintInstanceIri(shape, options.dataRoot);
-  await (CreateBuilder.from(shape.id) as any).withId(id).set(data).exec();
+  const builder = buildInCatalog(options, () =>
+    (CreateBuilder.from(shape.id) as any).withId(id).set(data),
+  );
+  await builder.exec();
   return {id};
 }
 
@@ -102,6 +106,7 @@ export async function updateInstanceWithDsl(
   shape: NodeShapeWire,
   instanceId: string,
   values: InstanceValues,
+  options?: CatalogOptions,
 ): Promise<void> {
   const known = knownLabels(shape);
   const data: Record<string, unknown> = {};
@@ -110,5 +115,8 @@ export async function updateInstanceWithDsl(
     data[label] = value === '' || value === undefined ? null : toGraphValue(value);
   }
   if (Object.keys(data).length === 0) return;
-  await (UpdateBuilder.from(shape.id) as any).for(instanceId).set(data).exec();
+  const builder = buildInCatalog(options, () =>
+    (UpdateBuilder.from(shape.id) as any).for(instanceId).set(data),
+  );
+  await builder.exec();
 }

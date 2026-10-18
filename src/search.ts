@@ -18,6 +18,7 @@
 
 import {SelectBuilder} from '@_linked/core/queries/QueryBuilder';
 import type {NodeShapeWire} from '@_linked/core/shapes/nodeShapeWire';
+import {buildInCatalog, type CatalogOptions} from './catalogScope.js';
 import {labelProperty} from './columns.js';
 import type {InstanceSuggestion, SearchInstancesOptions} from './host.js';
 
@@ -25,6 +26,7 @@ import type {InstanceSuggestion, SearchInstancesOptions} from './host.js';
 export async function searchInstancesWithDsl(
   shape: NodeShapeWire,
   options: SearchInstancesOptions = {},
+  catalogOptions?: CatalogOptions,
 ): Promise<{results: InstanceSuggestion[]; hasMore: boolean}> {
   const label = labelProperty(shape);
   const limit = options.limit ?? 20;
@@ -34,26 +36,29 @@ export async function searchInstancesWithDsl(
   // second COUNT query — cheaper, and it cannot disagree with the page it describes.
   const probe = limit + 1;
 
-  let builder = SelectBuilder.from(shape.id).select((instance: any) =>
-    label ? [instance[label.label]] : [],
-  ) as unknown as {
-    where(fn: (i: any) => unknown): unknown;
-    limit(n: number): unknown;
-    offset(n: number): unknown;
-    exec(): Promise<Record<string, unknown>[]>;
-  };
-
   const query = options.query?.trim();
-  if (query && label) {
-    // No label means nothing to match on, so a text query would filter everything out —
-    // better to return the unfiltered page than an empty one.
-    builder = builder.where((instance: any) =>
-      instance[label.label].contains(query),
-    ) as typeof builder;
-  }
+  const builder = buildInCatalog(catalogOptions, () => {
+    let built = SelectBuilder.from(shape.id).select((instance: any) =>
+      label ? [instance[label.label]] : [],
+    ) as unknown as {
+      where(fn: (i: any) => unknown): unknown;
+      limit(n: number): unknown;
+      offset(n: number): unknown;
+      exec(): Promise<Record<string, unknown>[]>;
+    };
 
-  builder = builder.limit(probe) as typeof builder;
-  if (offset) builder = builder.offset(offset) as typeof builder;
+    if (query && label) {
+      // No label means nothing to match on, so a text query would filter everything out —
+      // better to return the unfiltered page than an empty one.
+      built = built.where((instance: any) =>
+        instance[label.label].contains(query),
+      ) as typeof built;
+    }
+
+    built = built.limit(probe) as typeof built;
+    if (offset) built = built.offset(offset) as typeof built;
+    return built;
+  });
 
   const rows = (await builder.exec()) ?? [];
   const hasMore = rows.length > limit;
