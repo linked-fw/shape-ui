@@ -28,10 +28,9 @@ import type {ShapeCatalog} from '@_linked/core/utils/ShapeCatalog';
 import type {CatalogOptions} from './catalogScope.js';
 import {nullHost, type DataManagerHost} from './host.js';
 import {registerRuntimeShapes} from '@_linked/core/shapes/registerRuntimeShape';
+import {sharedState} from '@_linked/core/utils/sharedState';
 import {narrowSuggestions, searchInstancesWithDsl} from './search.js';
 import {createInstanceWithDsl, updateInstanceWithDsl} from './write.js';
-
-const HostContext = createContext<DataManagerHost>(nullHost());
 
 /**
  * Where the host's catalog stands.
@@ -59,8 +58,6 @@ export type HostCatalogState =
 const NO_CATALOG: HostCatalogState = {status: 'none'};
 const LOADING: HostCatalogState = {status: 'loading'};
 
-const CatalogContext = createContext<HostCatalogState>(NO_CATALOG);
-
 /**
  * The host's `ShapeCatalog`, for a host that has `resolveShapeCatalog`; `undefined` otherwise.
  *
@@ -72,7 +69,25 @@ interface ShapeCatalogHandle {
   current: () => Promise<ShapeCatalog>;
 }
 
-const ShapeCatalogContext = createContext<ShapeCatalogHandle | undefined>(undefined);
+/**
+ * The three contexts, kept in core's `sharedState` rather than created per module copy.
+ *
+ * This module can be evaluated twice in one runtime (Vite's SSR runner and Node under
+ * `linked start`, or two browser bundles). A context created at module level would then exist
+ * twice, and a provider from one copy would be invisible to a hook from the other: the hook
+ * would get the default, `nullHost()`, with no error. Kept on `globalThis` under
+ * `Symbol.for('@_linked/shape-ui:contexts')`, every copy uses the same context objects. This
+ * holds while the copies share one React; two Reacts cannot share a context at all.
+ */
+const {HostContext, CatalogContext, ShapeCatalogContext} = sharedState(
+  '@_linked/shape-ui',
+  'contexts',
+  () => ({
+    HostContext: createContext<DataManagerHost>(nullHost()),
+    CatalogContext: createContext<HostCatalogState>(NO_CATALOG),
+    ShapeCatalogContext: createContext<ShapeCatalogHandle | undefined>(undefined),
+  }),
+);
 
 export interface DataManagerHostProviderProps {
   host: DataManagerHost;
