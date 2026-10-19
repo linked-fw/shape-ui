@@ -5,14 +5,18 @@ summary: >
   runtime inside `@_linked/core`'s `sharedState('@_linked/shape-ui', 'contexts', …)`, so a
   `DataManagerHostProvider` from one copy of shape-ui reaches `useDataManagerHost` and the catalog
   hooks of another copy, instead of the hooks silently getting `nullHost()`. Requires core ^2.36.0.
-  A jsdom test renders the provider from one copy and a consumer from a second copy. Patch release.
+  A jsdom test renders the provider from one copy and a consumer from a second copy. Released in 2.8.1.
 ---
 
 # 001 — Host contexts shared across copies
 
 Replaces backlog 002 ("contexts a second copy does not see"). Follows the convention in linked-fw/cli
 [shared state and error brands](https://github.com/linked-fw/cli/blob/main/docs/architecture/shared-state-and-error-brands.md)
-§3 (React contexts), filed by the survey in cli report 020.
+§3 (React contexts). The cross-repo effort that set the convention and surveyed every package is
+recorded in linked-fw/cli report 020,
+[shared state and error brands](https://github.com/linked-fw/cli/blob/main/docs/reports/020-shared-state-and-error-brands.md).
+The backlog item itself was filed in https://github.com/linked-fw/shape-ui/pull/70 and removed by
+the fix.
 
 ## Why
 
@@ -36,7 +40,7 @@ React contexts at module level, so each copy had its own:
   public API (`DataManagerHostProvider` and the hooks) is unchanged.
 - `package.json`: `@_linked/core` `^2.35.0` → `^2.36.0` (the first release with `sharedState`);
   the lockfile resolves 2.36.1.
-- Changeset `.changeset/shared-host-contexts.md` (patch).
+- Changeset `.changeset/shared-host-contexts.md` (patch), released as 2.8.1.
 
 ## Decisions
 
@@ -69,3 +73,9 @@ React contexts at module level, so each copy had its own:
 
 - The status table in linked-fw/cli `docs/architecture/shared-state-and-error-brands.md` still
   lists shape-ui as "shape-ui backlog 002"; it can say "done" once this release is out (cli repo).
+
+## PRs
+
+- https://github.com/linked-fw/shape-ui/pull/70 (backlog item filed)
+- https://github.com/linked-fw/shape-ui/pull/71 (fix; released as 2.8.1 in
+  https://github.com/linked-fw/shape-ui/pull/72)
