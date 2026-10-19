@@ -1,5 +1,11 @@
 # @\_linked/ui
 
+## 2.8.1
+
+### Patch Changes
+
+- [#71](https://github.com/linked-fw/shape-ui/pull/71) [`fbda6e8`](https://github.com/linked-fw/shape-ui/commit/fbda6e81894a795cffdc6269f14e606c7b543935) Thanks [@flyon](https://github.com/flyon)! - `DataManagerHostProvider`'s three contexts (the host, its catalog state and its `ShapeCatalog`) are kept in `@_linked/core`'s `sharedState`, so a provider from one copy of shape-ui reaches the hooks of another (`useDataManagerHost` no longer falls back to `nullHost()` silently). Requires `@_linked/core` ^2.36.0.
+
 ## 2.8.0
 
 ### Minor Changes
