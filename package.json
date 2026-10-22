@@ -45,7 +45,7 @@
     "@jest/globals": "^30.5.2",
     "@types/node": "^24.0.0",
     "@types/react": "^19.3.0",
-    "framer-motion": "^13.0.0",
+    "framer-motion": "^14.0.0",
     "jest": "^30.5.2",
     "jest-environment-jsdom": "^30.5.2",
     "react": "^19.3.0",
