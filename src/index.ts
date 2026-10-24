@@ -119,6 +119,7 @@ export {TextfieldEditor} from './components/TextfieldEditor.js';
 
 // ─── Shape domain ────────────────────────────────────────────────────────────
 export * from './shape/contracts.js';
+export * from './shape/inheritance.js';
 export * from './shape/naming.js';
 export * from './shape/nodeDisplay.js';
 export * from './shape/propertyVisibility.js';

@@ -21,6 +21,7 @@ import {
 } from '../shape/propertyVisibility.js';
 import { validateAllFields } from '../shape/validation.js';
 import { DynamicForm } from './DynamicFormField.js';
+import { inheritedFromName } from '../shape/inheritance.js';
 // Shared by both form organisms — named for what it is, rather than one of its two
 // consumers importing the other's stylesheet.
 import style from './forms.module.css';
@@ -246,6 +247,7 @@ function AddInstanceForms({
                         onBeforeNavigate={handleBeforeNavigate}
                         error={fieldErrors[propShape.label]}
                         dependencyState={getDependencyState(propShape.label)}
+                        inheritedFrom={inheritedFromName(propShape, allShapes)}
                       />
                     </motion.div>
                   );
@@ -267,14 +269,25 @@ function AddInstanceForms({
                       </Select.Trigger>
                       <Select.Content>
                         <Select.Group>
-                          {availableExtras.map((c) => (
-                            <Select.Item key={c.property.label} value={c.property.label}>
-                              {c.property.label
-                                .replace(/([A-Z])/g, ' $1')
-                                .replace(/_/g, ' ')
-                                .replace(/^./, (char) => char.toUpperCase())}
-                            </Select.Item>
-                          ))}
+                          {availableExtras.map((c) => {
+                            const fieldLabel = c.property.label
+                              .replace(/([A-Z])/g, ' $1')
+                              .replace(/_/g, ' ')
+                              .replace(/^./, (char) => char.toUpperCase());
+                            const origin = inheritedFromName(c.property, allShapes);
+                            return (
+                              <Select.Item
+                                key={c.property.label}
+                                value={c.property.label}
+                                textValue={fieldLabel}
+                              >
+                                {fieldLabel}
+                                {origin && (
+                                  <span className={style.inheritedFrom}> · from {origin}</span>
+                                )}
+                              </Select.Item>
+                            );
+                          })}
                         </Select.Group>
                       </Select.Content>
                     </Select.Root>

@@ -41,6 +41,14 @@
   margin-top: 0.25rem;
 }
 
+/* The shape an inherited field comes from: quiet, under the label. */
+.inheritedFrom {
+  color: var(--text-auxiliary);
+  font-size: var(--typography-small-size);
+  font-style: italic;
+  margin-top: var(--space-2xs);
+}
+
 .label sup {
   color: var(--intent-danger-icon);
   margin-left: var(--space-2xs);
