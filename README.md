@@ -70,13 +70,19 @@ functions a host calls itself: `selectInstances`, `selectInstance`, `searchInsta
 `createInstanceWithDsl` and `updateInstanceWithDsl` each take `{catalog}` as their last
 argument.
 
+**Inherited fields.** A host whose wires list a shape's inherited property shapes next to its
+own can mark each inherited one with `inheritedFrom: {id}`, the IRI of the shape that declares
+it. `AddInstanceForms` and `EditInstanceForms` then name that shape under the field's label and
+in the "Add optional field" menu ("from Action"), by its label in `allShapes` or else the last
+segment of its IRI. `inheritedFromName(property, shapes)` gives the same name.
+
 ## Tests
 
 ```sh
 npm test
 ```
 
-Jest, over `src/**/*.test.ts`; CI runs it on every PR.
+Jest, over `src/**/*.test.ts` and `src/**/*.test.tsx`; CI runs it on every PR.
 
 ## Why the name changed
 

@@ -64,7 +64,10 @@ describe('two copies of hostContext', () => {
 
   test("a consumer from one copy sees the other copy's provider", async () => {
     const second = await secondCopy();
-    const host: DataManagerHost = {dataRoot: 'https://example.org/data/'};
+    const host: DataManagerHost = {
+      dataRoot: 'https://example.org/data/',
+      resolveShape: async () => undefined,
+    };
     const seen: {dataRoot?: string; catalog?: string} = {};
 
     function Consumer() {

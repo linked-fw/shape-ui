@@ -28,6 +28,8 @@ interface DynamicFormProps {
   error?: string;
   /** Dependency state from parent fields (visibility + narrowing) */
   dependencyState?: FieldDependencyState;
+  /** The name of the shape this field is inherited from; marked under the label when set. */
+  inheritedFrom?: string;
 }
 
 // Helper: format a Date or ISO string for <input type="date">
@@ -70,12 +72,14 @@ function FieldWrapper({
   required,
   error,
   description,
+  inheritedFrom,
   children,
 }: {
   label: string;
   required: boolean;
   error?: string;
   description?: string;
+  inheritedFrom?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -101,6 +105,9 @@ function FieldWrapper({
             </Tooltip.Root>
           )}
         </label>
+        {inheritedFrom && (
+          <span className={style.inheritedFrom}>from {inheritedFrom}</span>
+        )}
       </div>
       <div className={style.value}>
         {children}
@@ -123,6 +130,7 @@ function DynamicForm({
   onBeforeNavigate,
   error: externalError,
   dependencyState,
+  inheritedFrom,
 }: DynamicFormProps) {
   const [localError, setLocalError] = useState('');
   const displayError = externalError || localError;
@@ -159,7 +167,13 @@ function DynamicForm({
           : String(value)
         : '';
     return (
-      <FieldWrapper label={label} required={required} error={displayError} description={property.description}>
+      <FieldWrapper
+        label={label}
+        required={required}
+        error={displayError}
+        description={property.description}
+        inheritedFrom={inheritedFrom}
+      >
         <select
           className={style.selectField}
           required={required}
@@ -191,7 +205,13 @@ function DynamicForm({
         : null;
 
     return (
-      <FieldWrapper label={label} required={required} error={displayError} description={property.description}>
+      <FieldWrapper
+        label={label}
+        required={required}
+        error={displayError}
+        description={property.description}
+        inheritedFrom={inheritedFrom}
+      >
         {narrowingHint && (
           <span className={style.narrowingHint}>
             Select {narrowingHint} to narrow options
@@ -216,7 +236,13 @@ function DynamicForm({
     // Boolean → native checkbox
     if (dt === xsd.boolean.id) {
       return (
-        <FieldWrapper label={label} required={required} error={displayError} description={property.description}>
+        <FieldWrapper
+          label={label}
+          required={required}
+          error={displayError}
+          description={property.description}
+          inheritedFrom={inheritedFrom}
+        >
           <input
             type="checkbox"
             className={style.checkboxField}
@@ -230,7 +256,13 @@ function DynamicForm({
     // Date
     if (dt === xsd.date.id) {
       return (
-        <FieldWrapper label={label} required={required} error={displayError} description={property.description}>
+        <FieldWrapper
+          label={label}
+          required={required}
+          error={displayError}
+          description={property.description}
+          inheritedFrom={inheritedFrom}
+        >
           <input
             type="date"
             className={style.textFormField}
@@ -246,7 +278,13 @@ function DynamicForm({
     // DateTime
     if (dt === xsd.dateTime.id) {
       return (
-        <FieldWrapper label={label} required={required} error={displayError} description={property.description}>
+        <FieldWrapper
+          label={label}
+          required={required}
+          error={displayError}
+          description={property.description}
+          inheritedFrom={inheritedFrom}
+        >
           <input
             type="datetime-local"
             className={style.textFormField}
@@ -266,7 +304,13 @@ function DynamicForm({
     ) {
       const bounds = computeNumericBounds(property, true);
       return (
-        <FieldWrapper label={label} required={required} error={displayError} description={property.description}>
+        <FieldWrapper
+          label={label}
+          required={required}
+          error={displayError}
+          description={property.description}
+          inheritedFrom={inheritedFrom}
+        >
           <input
             type="number"
             step="1"
@@ -289,7 +333,13 @@ function DynamicForm({
     ) {
       const bounds = computeNumericBounds(property, false);
       return (
-        <FieldWrapper label={label} required={required} error={displayError} description={property.description}>
+        <FieldWrapper
+          label={label}
+          required={required}
+          error={displayError}
+          description={property.description}
+          inheritedFrom={inheritedFrom}
+        >
           <input
             type="number"
             step="any"
@@ -307,7 +357,13 @@ function DynamicForm({
     // URI / anyURI
     if (dt === 'http://www.w3.org/2001/XMLSchema#anyURI') {
       return (
-        <FieldWrapper label={label} required={required} error={displayError} description={property.description}>
+        <FieldWrapper
+          label={label}
+          required={required}
+          error={displayError}
+          description={property.description}
+          inheritedFrom={inheritedFrom}
+        >
           <FormField
             name={formName}
             type="url"
@@ -329,7 +385,13 @@ function DynamicForm({
     if (property.pattern) strAttrs.pattern = property.pattern;
 
     return (
-      <FieldWrapper label={label} required={required} error={displayError} description={property.description}>
+      <FieldWrapper
+        label={label}
+        required={required}
+        error={displayError}
+        description={property.description}
+        inheritedFrom={inheritedFrom}
+      >
         <FormField
           name={formName}
           type="text"

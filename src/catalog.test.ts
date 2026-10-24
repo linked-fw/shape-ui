@@ -9,6 +9,7 @@ import {
   getActiveShapeCatalog,
 } from '@_linked/core/utils/ShapeCatalog';
 import {lower} from '@_linked/core/queries/lower';
+import {unsupportedGraphQuery} from '@_linked/core/queries/graphQuery';
 import {
   createToSparql,
   selectToSparql,
@@ -85,9 +86,12 @@ const dataset: IDataset = {
     return {} as any;
   },
   async deleteQuery() {
-    return {deleted: [], count: 0} as any;
+    throw new Error('deleteQuery is not used by this test double');
   },
-} as unknown as IDataset;
+  async graphQuery(query) {
+    throw unsupportedGraphQuery(query);
+  },
+};
 
 beforeAll(() => {
   LinkedStorage.setDefaultDataset(dataset);

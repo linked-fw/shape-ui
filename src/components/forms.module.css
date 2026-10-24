@@ -35,6 +35,13 @@
   padding: var(--space-sm) 0;
 }
 
+/* The shape an inherited field comes from, after its name in the add-field menu. */
+.inheritedFrom {
+  color: var(--text-auxiliary);
+  font-size: var(--typography-small-size);
+  font-style: italic;
+}
+
 /* === Save Error === */
 .saveError {
   color: var(--intent-danger-text);
