@@ -1,5 +1,11 @@
 # @\_linked/ui
 
+## 2.9.2
+
+### Patch Changes
+
+- [#78](https://github.com/linked-fw/shape-ui/pull/78) [`986d379`](https://github.com/linked-fw/shape-ui/commit/986d3794632219f96e535ca241b8943807ef18c2) Thanks [@flyon](https://github.com/flyon)! - Property types and `DynamicFormField` take their `xsd` datatypes from `@_linked/xsd/ontologies/xsd` (the vocabulary package, now a dependency) instead of core's internal `@_linked/core/ontologies/xsd` module.
+
 ## 2.9.1
 
 ### Patch Changes
