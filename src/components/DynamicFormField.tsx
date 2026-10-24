@@ -106,9 +106,7 @@ function FieldWrapper({
           )}
         </label>
         {inheritedFrom && (
-          <span className={style.inheritedFrom} title={`Inherited from ${inheritedFrom}`}>
-            from {inheritedFrom}
-          </span>
+          <span className={style.inheritedFrom}>from {inheritedFrom}</span>
         )}
       </div>
       <div className={style.value}>

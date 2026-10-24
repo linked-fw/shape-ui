@@ -91,7 +91,7 @@ describe('the CMS forms mark inherited fields', () => {
       />,
     );
     expect(labels(html)).toEqual(['Title *', 'Owner * from Action']);
-    expect(html).toContain('<span class="inheritedFrom" title="Inherited from Action">');
+    expect(html).toContain('<span class="inheritedFrom">from Action</span>');
   });
 
   test('EditInstanceForms', () => {
@@ -105,10 +105,17 @@ describe('the CMS forms mark inherited fields', () => {
     expect(labels(html)).toEqual(['Title *', 'Owner * from Action']);
   });
 
-  test('without allShapes the marker still names the shape from its IRI', () => {
+  test('without allShapes the marker names the shape from its IRI', () => {
+    // An IRI whose last segment differs from any label, so only the fallback can produce it.
+    const fromIri = {
+      ...task,
+      propertyShapes: task.propertyShapes.map((p) =>
+        p.label === 'owner' ? {...p, inheritedFrom: {id: `${base}shape/BaseAction`}} : p,
+      ),
+    } as unknown as NodeShapeWire;
     const html = renderToStaticMarkup(
-      <AddInstanceForms shapeId={task.id} shape={task} onComplete={() => {}} />,
+      <AddInstanceForms shapeId={task.id} shape={fromIri} onComplete={() => {}} />,
     );
-    expect(labels(html)).toEqual(['Title *', 'Owner * from Action']);
+    expect(labels(html)).toEqual(['Title *', 'Owner * from Base Action']);
   });
 });

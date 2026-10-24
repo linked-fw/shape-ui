@@ -30,7 +30,7 @@ belongs to `Action`.
 
 - **Mark each field, do not group.** Fields keep the order and visibility rules they had; an
   inherited one carries a quiet italic "from Action" under its label (auxiliary text colour, small
-  size, as the dependency hint), with the title "Inherited from Action". The "Add optional field"
+  size, as the dependency hint). The "Add optional field"
   menu shows "Owner · from Action"; the item's `textValue` stays the field name, so typeahead is
   unchanged.
 - **The name.** The shape's `label` in `allShapes` when the form has it, else the last segment of
@@ -54,14 +54,16 @@ belongs to `Action`.
 ## Tests
 
 - `src/components/inheritedFrom.test.tsx` (`react-dom/server`): `inheritedFromName` by label, by
-  IRI fallback, and undefined for an own field or a malformed mark; `AddInstanceForms` and
+  IRI fallback (`BaseAction` → "Base Action"), and undefined for an own field or a malformed mark; `AddInstanceForms` and
   `EditInstanceForms` render "from Action" for the inherited field only, with and without
   `allShapes`.
 - At merge, in a scratch copy installed from npm (core 2.39.3): 9 suites, 82 tests pass;
   `tsc --noEmit -p tsconfig-esm.json` passes; `npx linked build` passes.
-- Run in the workspace against the localized core, `hostContext.copies.test.ts` hits a Jest ESM
-  module-cache error ("Module cache already has entry …/_linked-core/lib/esm/…"); it passes
-  against the installed core and in CI.
+- `hostContext.copies.test.ts` failed its typecheck on `main` (its host lacked the required
+  `resolveShape`), so it had not run locally. Fixed, it passes in the scratch copy. Run in the CN
+  workspace against the localized core, it hits a Jest ESM module-cache error ("Module cache
+  already has entry …/_linked-core/lib/esm/shapes/nodeShapeData.js") from
+  `isolateModulesAsync` re-evaluating core; that is the workspace's linked core, not this change.
 
 ## Known limits
 
@@ -75,4 +77,38 @@ belongs to `Action`.
 
 ## PRs
 
-- https://github.com/linked-fw/shape-ui/pull/TBD
+- https://github.com/linked-fw/shape-ui/pull/74
+- https://github.com/linked-fw/core/pull/383 (closes core backlog 063)
+
+## PR
+
+**What changed**
+
+- The CMS forms mark inherited fields. A property shape the host's wire marks
+  `inheritedFrom: {id}` shows a quiet "from Action" under its label (`AddInstanceForms`,
+  `EditInstanceForms`, via `DynamicForm`) and "Owner · from Action" in the "Add optional field"
+  menu. New `src/shape/inheritance.ts`: `inheritedFromId`, `inheritedFromName`,
+  `InheritablePropertyShapeWire` (exported). Create Now backlog 131.
+- Core backlog 063: the `IDataset` double in `src/catalog.test.ts` implements every required
+  method, without the `as unknown as IDataset` cast; `deleteQuery` rejects, `graphQuery` throws
+  `unsupportedGraphQuery`. `@_linked/core` ^2.36.0 → ^2.39.3, lockfile refreshed in a scratch copy.
+- `hostContext.copies.test.ts`: its host gains the required `resolveShape` (it failed typecheck).
+- Jest runs `.test.tsx` suites and stubs stylesheet imports. Minor changeset.
+
+**Verification** (scratch copy installed from npm, core 2.39.3)
+
+```
+Test Suites: 9 passed, 9 total
+Tests:       82 passed, 82 total
+tsc --noEmit -p tsconfig-esm.json  → exit 0
+npx linked build                   → ✔ Build successful
+```
+
+**Deviations:** none from the brief. The review's medium findings: the uncommitted changeset (it
+was committed in the next commit) and `hostContext.copies.test.ts` not running in the CN
+workspace (pre-existing, described under Tests). Lows taken: the fallback test uses an IRI that
+differs from the label, the redundant `title` is gone, the changeset wording.
+
+**Follow-ups:** Create Now takes 2.9.0 through its lockfile (its `^2.8.1` range admits it); the
+menu marker has no test (closed Radix content does not render statically), recorded under Known
+limits.

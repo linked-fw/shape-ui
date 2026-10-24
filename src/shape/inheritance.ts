@@ -20,7 +20,9 @@ export function inheritedFromId(property: PropertyShapeWire): string | undefined
 
 /**
  * The name of the shape `property` is inherited from: its label in `shapes` (keyed by IRI), else
- * the last segment of its IRI. Undefined for a property the shape declares itself.
+ * the last segment of its IRI (split on `/` and `#`, so a hash IRI names its fragment, where
+ * `getShapeParamsFromUri` reads only path segments). Undefined for a property the shape declares
+ * itself.
  */
 export function inheritedFromName(
   property: PropertyShapeWire,
