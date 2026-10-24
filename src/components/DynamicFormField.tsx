@@ -2,7 +2,7 @@ import { Tooltip } from '@_linked/primitives/components/Tooltip';
 import type { PropertyShapeWire } from '@_linked/core/shapes/nodeShapeWire';
 import { shacl } from '@_linked/core/ontologies/shacl';
 import { isRelation } from '@_linked/core/shapes/relationShape';
-import { xsd } from '@_linked/core/ontologies/xsd';
+import * as xsd from '@_linked/xsd/ontologies/xsd';
 import { Shape } from '@_linked/core/shapes/Shape';
 import { useState } from 'react';
 import { Icons } from '@_linked/icons';
@@ -355,7 +355,7 @@ function DynamicForm({
     }
 
     // URI / anyURI
-    if (dt === 'http://www.w3.org/2001/XMLSchema#anyURI') {
+    if (dt === xsd.anyURI.id) {
       return (
         <FieldWrapper
           label={label}

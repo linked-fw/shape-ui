@@ -1,6 +1,6 @@
 import type { PropertyShapeWire } from '@_linked/core/shapes/nodeShapeWire';
 import { shacl } from '@_linked/core/ontologies/shacl';
-import { xsd } from '@_linked/core/ontologies/xsd';
+import * as xsd from '@_linked/xsd/ontologies/xsd';
 
 /**
  * Classifies a SHACL property shape into a UI-level type.
@@ -69,7 +69,7 @@ export function getPropertyUiType(property: PropertyShapeWire): PropertyUiType |
       return 'number';
     }
 
-    if (dt === 'http://www.w3.org/2001/XMLSchema#anyURI') return 'url';
+    if (dt === xsd.anyURI.id) return 'url';
 
     return 'text';
   }
