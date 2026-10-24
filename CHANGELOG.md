@@ -1,5 +1,14 @@
 # @\_linked/ui
 
+## 2.9.1
+
+### Patch Changes
+
+- [#76](https://github.com/linked-fw/shape-ui/pull/76) [`562003a`](https://github.com/linked-fw/shape-ui/commit/562003a27b1159581a23e16c03d43fae43348daf) Thanks [@flyon](https://github.com/flyon)! - `@_linked/schema` raised to ^1.8.0, the release with generated accessor modules (and
+  `@_linked/core` to ^2.41.0, which it requires). Shape UI imports only schema's shapes and
+  `ImageUploader` (`shapes/Thing`, `shapes/ImageObject`, `components/ImageUploader`), whose exports
+  are unchanged, so no source changed.
+
 ## 2.9.0
 
 ### Minor Changes
