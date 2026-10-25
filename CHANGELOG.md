@@ -1,5 +1,11 @@
 # @\_linked/ui
 
+## 2.9.3
+
+### Patch Changes
+
+- [#80](https://github.com/linked-fw/shape-ui/pull/80) [`10d9b82`](https://github.com/linked-fw/shape-ui/commit/10d9b82c9982d08adf279fe5cbcb41a83025d229) Thanks [@flyon](https://github.com/flyon)! - License: MIT (data under its original license)
+
 ## 2.9.2
 
 ### Patch Changes
