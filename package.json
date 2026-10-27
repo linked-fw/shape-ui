@@ -13,7 +13,9 @@
   "version": "2.9.3",
   "packageManager": "npm@12.2.0",
   "type": "module",
-  "linkedPackage": true,
+  "linked": {
+    "kind": "library"
+  },
   "main": "lib/esm/index.js",
   "types": "index.d.ts",
   "license": "MIT",
