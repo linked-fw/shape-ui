@@ -1,5 +1,11 @@
 # @\_linked/ui
 
+## 2.9.4
+
+### Patch Changes
+
+- [#82](https://github.com/linked-fw/shape-ui/pull/82) [`9c8278c`](https://github.com/linked-fw/shape-ui/commit/9c8278ca747800961c7f86c2d4bb213f167c4607) Thanks [@flyon](https://github.com/flyon)! - `package.json` says what this package is in `"linked": {"kind": "library"}` instead of `"linkedPackage": true`, which the CLI and server no longer read.
+
 ## 2.9.3
 
 ### Patch Changes
