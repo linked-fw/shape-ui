@@ -50,8 +50,13 @@ export async function searchInstancesWithDsl(
     if (query && label) {
       // No label means nothing to match on, so a text query would filter everything out —
       // better to return the unfiltered page than an empty one.
+      // A property without `maxCount: 1` is multi-valued: its accessor is a set, which has
+      // no `.contains()`, so match when any of its values contains the query.
+      const singleValued = label.maxCount === 1;
       built = built.where((instance: any) =>
-        instance[label.label].contains(query),
+        singleValued
+          ? instance[label.label].contains(query)
+          : instance[label.label].some((v: any) => v.contains(query)),
       ) as typeof built;
     }
 

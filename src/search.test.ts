@@ -15,6 +15,8 @@ import type {NodeShapeWire} from '@_linked/core/shapes/nodeShapeWire';
 const fromMock = jest.fn();
 const selectMock = jest.fn();
 const whereMock = jest.fn();
+const directMock = jest.fn();
+const someMock = jest.fn();
 const limitMock = jest.fn();
 const offsetMock = jest.fn();
 const execMock = jest.fn<() => Promise<Record<string, unknown>[]>>();
@@ -33,12 +35,18 @@ jest.unstable_mockModule('@_linked/core/queries/QueryBuilder', () => ({
         return builder;
       };
       builder.where = (fn: (i: unknown) => unknown) => {
+        // Mirrors the DSL: a single-valued accessor has `.contains()`, a multi-valued
+        // one is a set with `.some()` and no `.contains()`.
+        const value = {contains: (v: unknown) => (whereMock(v), true)};
         fn(
           new Proxy(
             {},
             {
               get: () => ({
-                contains: (v: unknown) => (whereMock(v), true),
+                contains: (v: unknown) => (directMock(v), whereMock(v), true),
+                some: (cb: (v: typeof value) => unknown) => (
+                  someMock(), cb(value)
+                ),
               }),
             },
           ),
@@ -97,6 +105,21 @@ describe('searchInstancesWithDsl', () => {
   test('a text query filters on the label', async () => {
     await searchInstancesWithDsl(shape([prop('name')]), {query: 'ada'});
     expect(whereMock).toHaveBeenCalledWith('ada');
+  });
+
+  test('a multi-valued label (no maxCount) filters through .some without throwing', async () => {
+    await expect(
+      searchInstancesWithDsl(shape([prop('name')]), {query: 'ada'}),
+    ).resolves.toBeDefined();
+    expect(whereMock).toHaveBeenCalledWith('ada');
+    expect(someMock).toHaveBeenCalled();
+    expect(directMock).not.toHaveBeenCalled();
+  });
+
+  test('a single-valued label (maxCount 1) filters with .contains directly', async () => {
+    await searchInstancesWithDsl(shape([prop('name', {maxCount: 1})]), {query: 'ada'});
+    expect(directMock).toHaveBeenCalledWith('ada');
+    expect(someMock).not.toHaveBeenCalled();
   });
 
   test('an empty or whitespace query browses rather than filtering', async () => {
