@@ -10,6 +10,7 @@ import {
 } from '@_linked/core/utils/ShapeCatalog';
 import {lower} from '@_linked/core/queries/lower';
 import {unsupportedGraphQuery} from '@_linked/core/queries/graphQuery';
+import {readKindOf, type ReadQuery, type ReadResult} from '@_linked/core/queries/readQuery';
 import {
   createToSparql,
   selectToSparql,
@@ -55,17 +56,22 @@ interface Seen {
 const seen: Seen[] = [];
 
 const dataset: IDataset = {
-  async selectQuery(query: any) {
-    seen.push({
-      kind: 'select',
-      captured: catalogOf(query),
-      active: getActiveShapeCatalog(),
-      sparql: selectToSparql(lower(query) as any),
-    });
-    return [] as any;
-  },
-  async askQuery() {
-    return false;
+  supports: ['ask'],
+  async readQuery<Q extends ReadQuery>(query: Q): Promise<ReadResult<Q>> {
+    switch (readKindOf(query)) {
+      case 'select':
+        seen.push({
+          kind: 'select',
+          captured: catalogOf(query as any),
+          active: getActiveShapeCatalog(),
+          sparql: selectToSparql(lower(query as any) as any),
+        });
+        return [] as ReadResult<Q>;
+      case 'ask':
+        return false as ReadResult<Q>;
+      default:
+        throw new Error(`This test double does not answer a ${readKindOf(query)} read.`);
+    }
   },
   async createQuery(query: any) {
     seen.push({
