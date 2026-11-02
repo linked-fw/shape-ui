@@ -126,7 +126,7 @@ function ReactTable({
   const [enumSelections, setEnumSelections] = React.useState<string[]>([]);
   const reducedMotion = useReducedMotion();
   // Row actions go through the host. Building `${ROUTES.data.path}/…/edit?s0=…` here
-  // assumed CN's URL layout; where "edit this row" leads is the host's decision.
+  // assumed one host's URL layout; where "edit this row" leads is the host's decision.
   const host = useDataManagerHost();
 
   // Deletion needs THREE things, not one: somewhere to scope the impact query, a way to

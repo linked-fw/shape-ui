@@ -12,7 +12,8 @@
  * stylesheet compiled on its own.
  *
  * What is left is genuinely local: pagination has no counterpart in the theme's component
- * families. Values come from Create Now's light theme so the two do not drift on day one.
+ * families. Values come from the light theme of the app it was extracted from, so the two do not
+ * drift on day one.
  * Import before your own theme; anything you define afterwards wins.
  */
 

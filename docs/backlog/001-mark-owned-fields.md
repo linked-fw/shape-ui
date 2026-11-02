@@ -8,9 +8,9 @@ packages: [shape-ui]
 
 # 001 — Mark owned fields and warn before an owned value is replaced
 
-Source: Create Now plan 068 phase 3 (its report 098, review round 1). Create Now now keeps a
-project shape's ownership (`contains`, `dependent`) as the app declares it, in the browser and on
-the backend, so a data-manager write cascades exactly as the app's own write does.
+Source: a host app's review. A host app can keep a project shape's ownership (`contains`,
+`dependent`) as the app declares it, in the browser and on the backend, so a data-manager
+write cascades exactly as the app's own write does.
 
 ## The gap
 

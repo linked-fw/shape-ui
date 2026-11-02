@@ -1,5 +1,5 @@
 /**
- * Shape Builder Types for Create Now
+ * Shape Builder Types
  *
  * Type definitions for SHACL shapes used in the Shape Builder.
  * Shapes define validation constraints and form generation rules for ontology classes.
@@ -401,7 +401,7 @@ export interface BuilderPropertyShape {
    */
   nestedPropertyShapes?: BuilderPropertyShape[];
 
-  // === UI/Display Properties (Create Now extensions) ===
+  // === UI/Display Properties (host app extensions) ===
 
   /** Is this a unique identifier property? */
   isUniqueIdentifier?: boolean;
@@ -586,7 +586,7 @@ export interface BuilderNodeShape {
   /** Visual position in visual builder */
   visualPosition?: { x: number; y: number };
 
-  // === UI/Display Properties (Create Now extensions) ===
+  // === UI/Display Properties (host app extensions) ===
 
   /** Icon identifier for the shape */
   icon?: string;
