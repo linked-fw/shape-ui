@@ -1,5 +1,13 @@
 # @\_linked/ui
 
+## 2.9.5
+
+### Patch Changes
+
+- [#84](https://github.com/linked-fw/shape-ui/pull/84) [`86aa6da`](https://github.com/linked-fw/shape-ui/commit/86aa6da225211936ec4a4aa3c0779af81cfb12b0) Thanks [@flyon](https://github.com/flyon)! - `@_linked/core` range raised to `^2.46.0`, the core minor with the one read method (`readQuery`).
+
+- [#84](https://github.com/linked-fw/shape-ui/pull/84) [`04e45a6`](https://github.com/linked-fw/shape-ui/commit/04e45a66b7d3dc788c0042caa12efc9e8e17aa61) Thanks [@flyon](https://github.com/flyon)! - `searchInstancesWithDsl` no longer throws when the label property is multi-valued (no `maxCount: 1`): it filters with `.some((v) => v.contains(query))` instead of `.contains(query)` on the set.
+
 ## 2.9.4
 
 ### Patch Changes
