@@ -158,7 +158,7 @@
   The declared range was wide enough that the resolved core depended on whatever the
   consumer — or this repo's own CI, via `package-lock.json` — happened to install. Core
   decides how a shape's IRI is minted, so a stale core made this package emit legacy
-  `data.lincd.org` IRIs instead of the arch-02 `linked.cm` scheme. Which IRIs a published
+  `data.lincd.org` IRIs instead of the public `linked.cm` scheme. Which IRIs a published
   package produces should not be a function of the installer's dependency tree.
 
   Minor rather than patch: this raises the minimum core a consumer must resolve, so it
@@ -250,7 +250,7 @@
 
 ### Minor Changes
 
-- [#11](https://github.com/linked-cm/shape-ui/pull/11) [`979e444`](https://github.com/linked-cm/shape-ui/commit/979e4442504ed6118a2e3b258a8fbc3b91b580ac) Thanks [@flyon](https://github.com/flyon)! - Absorb the shape-driven CRUD surfaces from `@create-now/data-manager`.
+- [#11](https://github.com/linked-cm/shape-ui/pull/11) [`979e444`](https://github.com/linked-cm/shape-ui/commit/979e4442504ed6118a2e3b258a8fbc3b91b580ac) Thanks [@flyon](https://github.com/flyon)! - Absorb the shape-driven CRUD surfaces from a host app's data-manager package.
 
   The editors here render one control for one property. What was missing was everything you build
   out of them: a table over any shape's instances, a form derived from its property list, a

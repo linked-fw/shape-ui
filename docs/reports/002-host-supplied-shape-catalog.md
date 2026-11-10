@@ -15,7 +15,7 @@ summary: >
 
 Without a catalog, the data manager registers each shape it resolves in `@_linked/core`'s
 process-wide registry (`registerRuntimeShapes`). That is enough for an app with one set of shapes.
-A host that serves several projects, or several branches of one (Create Now's browser), holds the
+A host that serves several projects, or several branches of one (a host app's project browser), holds the
 same shape IRI with different properties at once, and one registry cannot hold both. Core 2.35
 added `ShapeCatalog` and `withShapeCatalog` for exactly this; shape-ui now lets the host hand one in.
 
@@ -95,8 +95,8 @@ const rows = await selectInstances(shape, {catalog});
 
 ## Follow-ups
 
-- Consumer: Create Now's `CnDataManagerHost` supplies the catalog; recorded in Create Now's plan
-  for shape catalogs per project branch (Create Now repo).
+- Consumer: the host app's data-manager host supplies the catalog; recorded in the host app's plan
+  for shape catalogs per project branch.
 
 ## PRs
 

@@ -998,7 +998,7 @@ export type ShapeVisibility = 'local' | 'shared' | 'public';
  * The base shape always contains:
  * - Metadata (name, description, owner, etc.)
  * - A copy of the latest published version's constraints
- * - Reference to all versions via cnSh:hasVersion
+ * - Reference to all versions via a `hasVersion` link
  */
 export interface ShapeVersion {
   /** SemVer version string (e.g., "1.0.0", "1.2.3-beta") */
