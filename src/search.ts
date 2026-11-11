@@ -17,6 +17,7 @@
  */
 
 import {SelectBuilder} from '@_linked/core/queries/QueryBuilder';
+import {tracedPropertyExpression} from '@_linked/core/expressions/ExpressionNode';
 import type {NodeShapeWire} from '@_linked/core/shapes/nodeShapeWire';
 import {buildInCatalog, type CatalogOptions} from './catalogScope.js';
 import {labelProperty} from './columns.js';
@@ -50,13 +51,17 @@ export async function searchInstancesWithDsl(
     if (query && label) {
       // No label means nothing to match on, so a text query would filter everything out —
       // better to return the unfiltered page than an empty one.
-      // A property without `maxCount: 1` is multi-valued: its accessor is a set, which has
-      // no `.contains()`, so match when any of its values contains the query.
+      // A single-valued label (`maxCount: 1`) is a query primitive with `.contains()`. A
+      // multi-valued one is a primitive set: it has `.equals()` (some value equals) but no
+      // string methods, and no `.some()` either, which exists only on a multi-valued
+      // relation. So the filter is written on the property's values as one expression, the
+      // way core writes the set's own `min()`/`max()`: it holds when any value contains the
+      // query.
       const singleValued = label.maxCount === 1;
       built = built.where((instance: any) =>
         singleValued
           ? instance[label.label].contains(query)
-          : instance[label.label].some((v: any) => v.contains(query)),
+          : tracedPropertyExpression([label.id]).contains(query),
       ) as typeof built;
     }
 
