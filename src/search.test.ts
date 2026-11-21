@@ -15,8 +15,7 @@ import type {NodeShapeWire} from '@_linked/core/shapes/nodeShapeWire';
 const fromMock = jest.fn();
 const selectMock = jest.fn();
 const whereMock = jest.fn();
-const directMock = jest.fn();
-const someMock = jest.fn();
+const filteredMock = jest.fn();
 const limitMock = jest.fn();
 const offsetMock = jest.fn();
 const execMock = jest.fn<() => Promise<Record<string, unknown>[]>>();
@@ -35,20 +34,15 @@ jest.unstable_mockModule('@_linked/core/queries/QueryBuilder', () => ({
         return builder;
       };
       builder.where = (fn: (i: unknown) => unknown) => {
-        // Mirrors the DSL: a single-valued accessor has `.contains()`, a multi-valued
-        // one is a set with `.some()` and no `.contains()`.
-        const value = {contains: (v: unknown) => (whereMock(v), true)};
+        // Mirrors a single-valued label: the accessor has `.contains()`. It has no `.some()`:
+        // an earlier mock gave a multi-valued label `.some()`, which core's primitive sets
+        // never had. A multi-valued label builds its filter from core's expressions, not from
+        // this accessor; search.dsl.test.ts covers it with core's real builder.
+        filteredMock();
         fn(
           new Proxy(
             {},
-            {
-              get: () => ({
-                contains: (v: unknown) => (directMock(v), whereMock(v), true),
-                some: (cb: (v: typeof value) => unknown) => (
-                  someMock(), cb(value)
-                ),
-              }),
-            },
+            {get: () => ({contains: (v: unknown) => (whereMock(v), true)})},
           ),
         );
         return builder;
@@ -103,23 +97,18 @@ describe('searchInstancesWithDsl', () => {
   });
 
   test('a text query filters on the label', async () => {
-    await searchInstancesWithDsl(shape([prop('name')]), {query: 'ada'});
+    await searchInstancesWithDsl(shape([prop('name', {maxCount: 1})]), {query: 'ada'});
     expect(whereMock).toHaveBeenCalledWith('ada');
   });
 
-  test('a multi-valued label (no maxCount) filters through .some without throwing', async () => {
+  test('a multi-valued label (no maxCount) is still filtered, and never through the accessor', async () => {
     await expect(
       searchInstancesWithDsl(shape([prop('name')]), {query: 'ada'}),
     ).resolves.toBeDefined();
-    expect(whereMock).toHaveBeenCalledWith('ada');
-    expect(someMock).toHaveBeenCalled();
-    expect(directMock).not.toHaveBeenCalled();
-  });
-
-  test('a single-valued label (maxCount 1) filters with .contains directly', async () => {
-    await searchInstancesWithDsl(shape([prop('name', {maxCount: 1})]), {query: 'ada'});
-    expect(directMock).toHaveBeenCalledWith('ada');
-    expect(someMock).not.toHaveBeenCalled();
+    expect(filteredMock).toHaveBeenCalledTimes(1);
+    // The accessor is a primitive set in core, with no `.contains()`; the filter is built on
+    // the property's values instead (see search.dsl.test.ts for the SPARQL it lowers to).
+    expect(whereMock).not.toHaveBeenCalled();
   });
 
   test('an empty or whitespace query browses rather than filtering', async () => {
