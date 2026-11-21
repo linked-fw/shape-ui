@@ -186,7 +186,9 @@
 .tableWrapper {
   display: flex;
   flex-direction: column;
-  background-color: var(--surface-bg);
+  /* The toolbar (the action bar) shows this background: the table header's, so the toolbar, the
+     header row and the pagination are one light surface, set apart by borders only. */
+  background-color: var(--table-header-bg, var(--surface-bg));
   border: 1px solid var(--surface-border);
   border-radius: var(--radius-box);
   position: relative;
@@ -576,7 +578,11 @@ tbody tr:hover .sticky {
 
 .stickyRight {
   right: 0;
-  background: var(--surface-bg);
+  background: var(--table-row-bg, var(--surface-bg));
+}
+
+thead th.stickyRight {
+  background: var(--table-header-bg, var(--surface-bg));
 }
 
 /* === Checkbox Styling for Table === */
@@ -585,6 +591,13 @@ tbody tr:hover .sticky {
   /* Smaller checkbox in table */
   --checkbox-size: 18px;
   --checkbox-indicator-size: 12px;
+}
+
+/* === Empty dataset: a short message in place of the header row, the rows and the pagination === */
+.emptyMessage {
+  padding: var(--space-xl, 2rem) 1.5rem;
+  text-align: center;
+  color: var(--table-header-text);
 }
 
 /* === Pagination === */
@@ -835,7 +848,7 @@ tbody tr:hover .sticky {
 
 /* === Dark Mode === */
 [data-theme='dark'] .tableWrapper {
-  background-color: var(--surface-bg);
+  background-color: var(--table-header-bg, var(--surface-bg));
   border-color: var(--surface-border);
 }
 
@@ -923,7 +936,7 @@ tbody tr:hover .sticky {
 }
 
 [data-theme='dark'] .stickyRight {
-  background: var(--surface-bg);
+  background: var(--table-row-bg, var(--surface-bg));
 }
 
 [data-theme='dark'] thead th.sticky,

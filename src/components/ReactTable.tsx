@@ -417,6 +417,12 @@ function ReactTable({
 
   const hasFilters = filters.length > 0;
   const selectionCount = selectedUris.size;
+  // The whole dataset is empty (not one page, not a filter's result): the table then has no
+  // header row, select-all, Actions column or pagination, only a short message.
+  const datasetSize = totalCount ?? (data as any[]).length;
+  const isEmpty = !isLoading && datasetSize === 0;
+  // react-table reports 0 pages for 0 rows; the label counts at least the page shown.
+  const pageCount = Math.max(1, table.getPageCount());
 
   return (
     <div className={style.tableWrapper}>
@@ -726,6 +732,12 @@ function ReactTable({
           </motion.div>
         )}
       </AnimatePresence>
+      {isEmpty ? (
+        <Typography className={style.emptyMessage}>
+          No {shape ? formatShapeLabel(shape.label) : 'items'} yet.
+        </Typography>
+      ) : (
+      <>
       <div className={style.tableContainer}>
         <table className={style.table}>
           <thead>
@@ -906,7 +918,7 @@ function ReactTable({
           Page{' '}
           <strong>
             {table.getState().pagination.pageIndex + 1} of{' '}
-            {table.getPageCount().toLocaleString()}
+            {pageCount.toLocaleString()}
           </strong>
         </Typography>
         <div className={style.pageInput}>
@@ -981,6 +993,8 @@ function ReactTable({
           <Icons.ChevronsRight width={18} height={18} />
         </IconButton>
       </div>
+      </>
+      )}
 
       {deletionTarget && canDelete && (
         <InstanceDeletionDialog
