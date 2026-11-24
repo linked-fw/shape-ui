@@ -1,5 +1,15 @@
 # @\_linked/ui
 
+## 3.0.0
+
+### Major Changes
+
+- [#97](https://github.com/linked-fw/shape-ui/pull/97) [`44b9f24`](https://github.com/linked-fw/shape-ui/commit/44b9f24d3380fa18a3c1adfe74b89b4f8e94c673) Thanks [@flyon](https://github.com/flyon)! - The package object (`package`) gives `registerOntologies` in place of `linkedOntology`, which the core this release builds on no longer has. Node labels compact an IRI with the app's prefix map (the map the app loads), since packages no longer register prefixes; with no matching prefix the label is the IRI's last segment, as before.
+
+### Patch Changes
+
+- [#97](https://github.com/linked-fw/shape-ui/pull/97) [`254ed76`](https://github.com/linked-fw/shape-ui/commit/254ed76a7f61b51f6e46dc08022934af346bc082) Thanks [@flyon](https://github.com/flyon)! - Comments and docs describe the host app generically.
+
 ## 2.9.5
 
 ### Patch Changes
