@@ -32,17 +32,17 @@
     "web3"
   ],
   "dependencies": {
-    "@_linked/core": "^2.46.0",
-    "@_linked/react": "^2.0.0",
-    "@_linked/schema": "^1.8.0",
-    "@_linked/xsd": "^1.4.1",
+    "@_linked/core": "^3.0.0",
+    "@_linked/react": "^3.0.0",
+    "@_linked/schema": "^2.0.0",
+    "@_linked/xsd": "^2.0.0",
     "@tanstack/react-table": "^8.20.5"
   },
   "devDependencies": {
     "@_linked/cli": "^1.57.0",
     "@_linked/css": "^0.3.0",
     "@_linked/icons": "^1.0.0",
-    "@_linked/primitives": "^1.8.0",
+    "@_linked/primitives": "^2.0.0",
     "@changesets/changelog-github": "^1.0.0",
     "@changesets/cli": "^3.0.0",
     "@jest/globals": "^30.5.2",
@@ -95,7 +95,7 @@
   "peerDependencies": {
     "@_linked/css": "^0.3.0",
     "@_linked/icons": "^1.0.0",
-    "@_linked/primitives": "^1.2.0",
+    "@_linked/primitives": "^2.0.0",
     "framer-motion": ">=11",
     "react": "^18 || ^19"
   },
