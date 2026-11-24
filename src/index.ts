@@ -11,10 +11,11 @@
  * underneath — column derivation, property visibility, validation, and the read and write paths
  * through the Linked Query DSL.
  *
- * The surfaces arrived from `@create-now/data-manager`, where they were private on the
+ * The surfaces arrived from a host app's data manager, where they were private on the
  * assumption that shape-driven CRUD was a product. It is not: it renders any shape, knows
  * nothing about projects, and is worth nothing without shapes to render. The product is the
- * studio that authors them. See arch-03 §UI package layering.
+ * studio that authors them. Generic UI lives in packages; a product's
+ * own studio builds on them.
  *
  * `./package.js` is imported below, as in every other `@_linked/*` package, so this package
  * registers itself — the house pattern, nothing special here. It briefly had to be omitted:

@@ -1,7 +1,7 @@
 /**
  * Turning a shape IRI or a label into something a person can read.
  *
- * Pure string work over the Linked shape-IRI scheme (arch-02), with no knowledge of any
+ * Pure string work over the Linked shape-IRI scheme, with no knowledge of any
  * application: the same IRI produces the same short form wherever it is rendered. These live
  * here because a table header, a form label and a breadcrumb must not each have their own idea
  * of how `ActionPlan` is written out.
@@ -27,7 +27,7 @@ export function formatShapeLabel(str: string | null | undefined): string {
 /**
  * The short form of a shape IRI: `{packageSlug}:{ShapeName}`.
  *
- * Current scheme (arch-02): `https://linked.cm/shape/{slug}/{ShapeName}`.
+ * Current scheme: `https://linked.cm/shape/{slug}/{ShapeName}`.
  * Legacy scheme: `https://data.lincd.org/module/{slug}/shape/{name}` — still read, because
  * shapes materialized under the old scheme are still in stores.
  *

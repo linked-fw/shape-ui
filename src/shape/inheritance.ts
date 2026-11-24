@@ -2,7 +2,7 @@
  * Which shape an inherited property comes from.
  *
  * A host's catalog can list a shape's inherited property shapes next to its own, marking each
- * inherited one with `inheritedFrom: {id}`, the shape that declares it (Create Now does, when it
+ * inherited one with `inheritedFrom: {id}`, the shape that declares it (a host app can, when it
  * resolves `core:isExtending`). Core's `PropertyShapeWire` does not declare the field, so it is
  * read here as an optional extension: a catalog without it renders every field as the shape's own.
  */

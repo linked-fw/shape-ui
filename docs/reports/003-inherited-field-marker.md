@@ -12,9 +12,9 @@ summary: >
 
 ## Why
 
-Create Now stores a shape as declared (its own property shapes plus `core:isExtending`) and its
+The host app stores a shape as declared (its own property shapes plus `core:isExtending`) and its
 catalog read appends each shape's inherited property shapes, marking every one with
-`inheritedFrom: {id}`, the shape that declares it (Create Now report 118). The forms showed those
+`inheritedFrom: {id}`, the shape that declares it. The forms showed those
 fields exactly like the shape's own, so a person editing a `Task` could not tell that `owner`
 belongs to `Action`.
 
@@ -60,7 +60,7 @@ belongs to `Action`.
 - At merge, in a scratch copy installed from npm (core 2.39.3): 9 suites, 82 tests pass;
   `tsc --noEmit -p tsconfig-esm.json` passes; `npx linked build` passes.
 - `hostContext.copies.test.ts` failed its typecheck on `main` (its host lacked the required
-  `resolveShape`), so it had not run locally. Fixed, it passes in the scratch copy. Run in the CN
+  `resolveShape`), so it had not run locally. Fixed, it passes in the scratch copy. Run in the host app's
   workspace against the localized core, it hits a Jest ESM module-cache error ("Module cache
   already has entry …/_linked-core/lib/esm/shapes/nodeShapeData.js") from
   `isolateModulesAsync` re-evaluating core; that is the workspace's linked core, not this change.
@@ -72,8 +72,8 @@ belongs to `Action`.
 
 ## Follow-ups
 
-- Create Now takes the release through its lockfile (Renovate); its `^2.8.1` range already admits
-  it. Create Now backlog 131 is closed with this.
+- The host app takes the release through its lockfile (Renovate); its `^2.8.1` range already admits
+  it. The host app's backlog item for this is closed with it.
 
 ## PRs
 
@@ -88,7 +88,7 @@ belongs to `Action`.
   `inheritedFrom: {id}` shows a quiet "from Action" under its label (`AddInstanceForms`,
   `EditInstanceForms`, via `DynamicForm`) and "Owner · from Action" in the "Add optional field"
   menu. New `src/shape/inheritance.ts`: `inheritedFromId`, `inheritedFromName`,
-  `InheritablePropertyShapeWire` (exported). Create Now backlog 131.
+  `InheritablePropertyShapeWire` (exported).
 - Core backlog 063: the `IDataset` double in `src/catalog.test.ts` implements every required
   method, without the `as unknown as IDataset` cast; `deleteQuery` rejects, `graphQuery` throws
   `unsupportedGraphQuery`. `@_linked/core` ^2.36.0 → ^2.39.3, lockfile refreshed in a scratch copy.
@@ -105,10 +105,10 @@ npx linked build                   → ✔ Build successful
 ```
 
 **Deviations:** none from the brief. The review's medium findings: the uncommitted changeset (it
-was committed in the next commit) and `hostContext.copies.test.ts` not running in the CN
+was committed in the next commit) and `hostContext.copies.test.ts` not running in the host app's
 workspace (pre-existing, described under Tests). Lows taken: the fallback test uses an IRI that
 differs from the label, the redundant `title` is gone, the changeset wording.
 
-**Follow-ups:** Create Now takes 2.9.0 through its lockfile (its `^2.8.1` range admits it); the
+**Follow-ups:** the host app takes 2.9.0 through its lockfile (its `^2.8.1` range admits it); the
 menu marker has no test (closed Radix content does not render statically), recorded under Known
 limits.

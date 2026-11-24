@@ -7,12 +7,12 @@
  * true of the table and false of every relation field.
  *
  * It names no project. `SelectBuilder.from(shapeIri)` is routed by `LinkedStorage` exactly
- * like the table read: `AppDataRouter` inside Create Now, the app's own default dataset in
- * a standalone build.
+ * like the table read: a host's data router inside a host app, the app's own default dataset
+ * in a standalone build.
  *
  * The label comes from `labelProperty()` — the same rule the table uses for its label
  * column, so a row and a picker chip cannot disagree about what identifies an instance.
- * Create Now's `Project.searchInstances` RPC computed a label server-side with its own
+ * A host app's `searchInstances` RPC computed a label server-side with its own
  * rule; two mechanisms for one question is how the `getShapeInstances` divergence started.
  */
 

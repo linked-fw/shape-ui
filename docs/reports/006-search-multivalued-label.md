@@ -27,7 +27,7 @@ that ran it (core report 097 explains how it surfaced): a multi-valued accessor 
 
 - `npm test`: `Test Suites: 9 passed, 9 total`, `Tests: 84 passed, 84 total`
 - `npx linked build`: `Build successful`
-- CN, `vitest run src/data/CnDataManagerHost.catalog.test.tsx`: `Tests 3 passed (3)`
+- Host app, its data-manager host catalog test: `Tests 3 passed (3)`
 
 ### Follow-ups
 

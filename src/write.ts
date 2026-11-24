@@ -7,10 +7,10 @@
  *
  *   - finding the shape          → the host already resolved the catalog
  *   - minting the new IRI        → `host.dataRoot`, a plain value the host supplies
- *   - recording a projection edit → a Create Now studio concern, not a write concern
+ *   - recording a projection edit → a host studio concern, not a write concern
  *
  * So the write names no project either, and `LinkedStorage` routes it exactly as it routes
- * the read: `AppDataRouter` inside Create Now, the app's own dataset in a standalone or
+ * the read: a host's data router inside a host app, the app's own dataset in a standalone or
  * Capacitor build. That matters beyond tidiness — a read that routes one way and a write
  * that routes another is how a form silently saves into the wrong dataset.
  */
@@ -48,7 +48,7 @@ function knownLabels(shape: NodeShapeWire): Set<string> {
 /**
  * Mint an IRI for a new instance.
  *
- * `dataRoot` is the one value in this path the host has to supply: Create Now takes it
+ * `dataRoot` is the one value in this path the host has to supply: a host app takes it
  * from the project's config, a standalone app knows its own domain. Without it there is
  * no namespace to mint into, so this throws rather than inventing one — a node created
  * under a guessed IRI is worse than a failed create.

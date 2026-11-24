@@ -2,7 +2,7 @@
  * The wire shapes these components speak.
  *
  * Declared here rather than imported from a host application's client package. They were
- * imported from `create-now-js`, and because a `.d.ts` keeps its type imports, the emitted
+ * imported from such a package, and because a `.d.ts` keeps its type imports, the emitted
  * types carried that dependency forward — so anyone installing this package needed one
  * product's client just to typecheck a table. That is precisely the coupling the package
  * exists to avoid, and it survived the move because type-only imports are invisible at
