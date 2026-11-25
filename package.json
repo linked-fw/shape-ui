@@ -39,7 +39,7 @@
     "@tanstack/react-table": "^8.20.5"
   },
   "devDependencies": {
-    "@_linked/cli": "^1.57.0",
+    "@_linked/cli": "^2.0.0",
     "@_linked/css": "^0.3.0",
     "@_linked/icons": "^1.0.0",
     "@_linked/primitives": "^2.0.0",
